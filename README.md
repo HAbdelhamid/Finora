@@ -2,6 +2,13 @@
 
 Finora is a responsive, local-first finance tracker with separate **personal, independent / auto-entrepreneur and company workspaces**.
 
+
+## Beginner guide / product tour
+
+Once you've chosen to sign in, use demo, or work locally, Finora offers a small dismissible **"New here?"** invitation. **Show me around** launches an 11-step tour of workspaces, dashboard, transactions, accounts, planning, investments, reports, Zakat and storage. Each step uses plain-language explanations and highlights the real control on the current screen. **Next**, **Back**, **Skip tour** and **Finish** are available; **Escape** closes it. Use the floating **Help & tour** button to replay it.
+
+The guide is not an accounting assistant and does **not** create, edit, or upload financial records. It changes only the visible page and mobile menu during explanations. The invitation is remembered per browser and per signed-in user; no tour preferences are stored in your financial snapshots. It never interrupts the marketing site, login or initial workspace creation screens.
+
 ## User journeys
 
 - **/** — public marketing homepage with product features, workspace examples, privacy details and clear calls to action.

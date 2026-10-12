@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useRef,useState} from "react";
+import {useCallback,useEffect,useRef,useState} from "react";
 import {Activity,ArrowRight,BookOpen,BriefcaseBusiness,Building2,CalendarDays,ChartNoAxesCombined,ChevronDown,Cloud,Command,FileChartColumn,Landmark,LayoutDashboard,Menu,Moon,Plus,Settings2,ShieldCheck,Sun,Target,UserRound,WalletCards,X} from "lucide-react";
 import {useFinance} from "@/lib/finance-store";
 import {Overview} from "@/components/overview";
@@ -14,6 +14,7 @@ import {StorageProvider,useStorage} from "@/components/storage-provider";
 import {StorageSettings} from "@/components/storage-settings";
 import {formatMoney} from "@/lib/models";
 import {AppEntry} from "@/components/app-entry";
+import {GuidedTour} from "@/components/guided-tour";
 
 const links=[
  {name:"Overview",icon:LayoutDashboard,group:"WORKSPACE"},
@@ -48,13 +49,13 @@ function FinanceApp(){
  },[mounted]);
  if(!mounted)return <div className="boot-screen"><span className="boot-logo">f<span>.</span></span><p>Preparing your financial command center…</p></div>;
  const w=s.workspaces.find(x=>x.id===s.activeId)||s.workspaces[0];
- const navigate=(screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"smooth"})};
+ const navigate=useCallback((screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"instant"})},[]);
  const navIcon=(kind:string)=>kind==="personal"?<UserRound size={16}/>:kind==="freelance"?<BriefcaseBusiness size={16}/>:<Building2 size={16}/>;
  return <div className="app-shell">
  <aside id="finora-sidebar" className={"side-panel "+(drawer?"side-open":"")}>
   <div className="wordmark"><div className="wordmark-symbol"><span>f</span><i/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
   <div className="workspace-caption">ACTIVE WORKSPACE</div>
-  <div className="workspace-switch"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
+  <div className="workspace-switch" data-tour="workspace"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
    <select aria-label="Switch workspace" title="Switch workspace" value={w.id} onChange={e=>s.select(e.target.value)}>{s.workspaces.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
   <div className="nav-scroll-wrap"><div ref={navRef} className="side-scroll">{["WORKSPACE","INSIGHTS","MANAGE"].map(group=><div className="nav-group" key={group}><div className="nav-group-title">{group}</div>{links.filter(x=>x.group===group).map(x=><button className={"side-link "+(nav===x.name?"active":"")} key={x.name} onClick={()=>navigate(x.name)}><x.icon size={18} strokeWidth={1.9}/><span>{label(x.name)}</span>{nav===x.name&&<span className="active-indicator"/>}</button>)}</div>)}</div>{navHasMore&&<button className="nav-more" aria-label="More navigation below" onClick={()=>navRef.current?.scrollBy({top:190,behavior:"smooth"})}>Scroll for more <ChevronDown size={14}/></button>}</div>
   <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Choose local, cloud or hybrid storage from the Storage page.</p></div><div className="profile"><div className="profile-avatar">F</div><div><b>Finora workspace</b><small>{sync.user?"Google account connected":"Your private finance space"}</small></div></div></div>
@@ -85,7 +86,7 @@ function FinanceApp(){
  {nav==="Zakat"&&<Zakat/>}
  {nav==="Workspaces"&&<Workspaces/>}
  {nav==="Storage"&&<StorageSettings/>}
- </main><footer className="main-footer"><span>© 2026 Finora · Make every decision count.</span><span>{sync.mode==="local"?"Local device":sync.mode==="hybrid"?"Local + cloud":"Cloud"} · Not financial, tax or religious advice</span></footer></div></div>;
+ </main><footer className="main-footer"><span>© 2026 Finora · Make every decision count.</span><span>{sync.mode==="local"?"Local device":sync.mode==="hybrid"?"Local + cloud":"Cloud"} · Not financial, tax or religious advice</span></footer></div><GuidedTour onNavigate={navigate} onDrawerChange={setDrawer} currentNav={nav} drawerOpen={drawer} userId={sync.user?.id}/></div>;
 }
 
 export default function FinoraPage(){return <StorageProvider><AppEntry><FinanceApp/></AppEntry></StorageProvider>}
