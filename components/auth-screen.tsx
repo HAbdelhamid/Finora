@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState,type FormEvent} from "react";
 import Link from "next/link";
+import {BrandMark} from "@/components/brand-mark";
 import {ArrowLeft,ArrowRight,CheckCircle2,Eye,EyeOff,LockKeyhole,Mail,ShieldCheck,Sparkles} from "lucide-react";
 import {cloudConfigured,getSupabase} from "@/lib/supabase";
 import {googleSignIn} from "@/lib/cloud-storage";
@@ -57,7 +58,7 @@ export function AuthScreen({initialMode}:{initialMode:"login"|"signup"}){
   try{await googleSignIn()}catch(e){setError(e instanceof Error?e.message:"Google sign-in could not start.");setLoading(false)}
  };
  return <div className="auth-layout">
-  <section className="auth-main"><div className="auth-inner"><Link href="/" className="auth-brand"><span className="auth-brand-icon">f.</span> finora.</Link><div className="auth-content">
+  <section className="auth-main"><div className="auth-inner"><Link href="/" className="auth-brand"><span className="auth-brand-icon"><BrandMark size={37}/></span> finora.</Link><div className="auth-content">
    <Link className="auth-back" href="/"><ArrowLeft size={16}/> Back to homepage</Link>
    <span className="auth-eyebrow">{mode==="forgot"?"ACCOUNT RECOVERY":mode==="signup"?"START WITH CLARITY":"WELCOME BACK"}</span>
    <h1>{mode==="signup"?"Make money feel simple.":mode==="forgot"?"Reset your password.":"Welcome back."}</h1>

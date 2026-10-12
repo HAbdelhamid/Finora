@@ -2,6 +2,7 @@
 import {createContext,useCallback,useContext,useEffect,useRef,useState,type ReactNode} from "react";
 import type {User} from "@supabase/supabase-js";
 import {getSupabase,cloudConfigured} from "@/lib/supabase";
+import {BrandMark} from "@/components/brand-mark";
 import {useFinance,getFinoraSnapshot} from "@/lib/finance-store";
 import type {FinoraData} from "@/lib/models";
 import {commitCloudSnapshot,googleSignIn,loadCloudSnapshot,MODE_KEY,readMode,signOutCloud,type RemoteSnapshot,type StorageMode} from "@/lib/cloud-storage";
@@ -201,7 +202,7 @@ export function StorageProvider({children}:{children:ReactNode}){
     <button className="btn btn-outline" onClick={()=>void resolveConflict("local")}>Replace cloud with this device's version</button>
     {error&&<p className="warning-text">{error}</p>}
    </div></div>}
-  {!conflict&&blocked&&<div className="cloud-lock" role="status"><div className="cloud-lock-card"><div className="lock-mark">f.</div><h2>{!user?"Your cloud workspace is locked":"Opening your cloud vault"}</h2><p>{!user?"Sign in with Google or email to access your saved workspaces and transactions. Your data is private to your account.":status==="loading"?"Fetching your encrypted-transport cloud snapshot…":error||"Choose a version to continue."}</p>{!user&&<button className="btn btn-primary" onClick={()=>void signIn()}>Sign in with Google</button>}{!user&&<a className="btn btn-outline" href="/login">Sign in with email</a>}<button className="btn btn-outline" onClick={()=>void chooseMode("local")}>Use this browser instead</button>{error&&<p className="warning-text">{error}</p>}</div></div>}
+  {!conflict&&blocked&&<div className="cloud-lock" role="status"><div className="cloud-lock-card"><div className="lock-mark"><BrandMark size={46}/></div><h2>{!user?"Your cloud workspace is locked":"Opening your cloud vault"}</h2><p>{!user?"Sign in with Google or email to access your saved workspaces and transactions. Your data is private to your account.":status==="loading"?"Fetching your encrypted-transport cloud snapshot…":error||"Choose a version to continue."}</p>{!user&&<button className="btn btn-primary" onClick={()=>void signIn()}>Sign in with Google</button>}{!user&&<a className="btn btn-outline" href="/login">Sign in with email</a>}<button className="btn btn-outline" onClick={()=>void chooseMode("local")}>Use this browser instead</button>{error&&<p className="warning-text">{error}</p>}</div></div>}
  </CloudContext.Provider>;
 }
 export function useStorage(){const value=useContext(CloudContext);if(!value)throw Error("StorageProvider is missing");return value}

@@ -15,6 +15,10 @@ import {StorageSettings} from "@/components/storage-settings";
 import {formatMoney} from "@/lib/models";
 import {AppEntry} from "@/components/app-entry";
 import {GuidedTour} from "@/components/guided-tour";
+import {BrandMark} from "@/components/brand-mark";
+import {AccountAvatar} from "@/components/account-avatar";
+import {AccountControls} from "@/components/account-controls";
+import {accountDisplayName} from "@/lib/account-profile";
 
 const links=[
  {name:"Overview",icon:LayoutDashboard,group:"WORKSPACE"},
@@ -49,23 +53,23 @@ function FinanceApp(){
   recalc();
   return()=>{resize.disconnect();element.removeEventListener("scroll",recalc)};
  },[mounted]);
- if(!mounted)return <div className="boot-screen"><span className="boot-logo">f<span>.</span></span><p>Preparing your financial command center…</p></div>;
+ if(!mounted)return <div className="boot-screen"><span className="boot-logo"><BrandMark size={64}/></span><p>Preparing your financial command center…</p></div>;
  const w=s.workspaces.find(x=>x.id===s.activeId)||s.workspaces[0];
  const navIcon=(kind:string)=>kind==="personal"?<UserRound size={16}/>:kind==="freelance"?<BriefcaseBusiness size={16}/>:<Building2 size={16}/>;
  return <div className="app-shell">
  <aside id="finora-sidebar" className={"side-panel "+(drawer?"side-open":"")}>
-  <div className="wordmark"><div className="wordmark-symbol"><span>f</span><i/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
+  <div className="wordmark"><div className="wordmark-symbol"><BrandMark size={38}/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
   <div className="workspace-caption">ACTIVE WORKSPACE</div>
   <div className="workspace-switch" data-tour="workspace"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
    <select aria-label="Switch workspace" title="Switch workspace" value={w.id} onChange={e=>s.select(e.target.value)}>{s.workspaces.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
   <div className="nav-scroll-wrap"><div ref={navRef} className="side-scroll">{["WORKSPACE","INSIGHTS","MANAGE"].map(group=><div className="nav-group" key={group}><div className="nav-group-title">{group}</div>{links.filter(x=>x.group===group).map(x=><button className={"side-link "+(nav===x.name?"active":"")} key={x.name} onClick={()=>navigate(x.name)}><x.icon size={18} strokeWidth={1.9}/><span>{label(x.name)}</span>{nav===x.name&&<span className="active-indicator"/>}</button>)}</div>)}</div>{navHasMore&&<button className="nav-more" aria-label="More navigation below" onClick={()=>navRef.current?.scrollBy({top:190,behavior:"smooth"})}>Scroll for more <ChevronDown size={14}/></button>}</div>
-  <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Choose local, cloud or hybrid storage from the Storage page.</p></div><div className="profile"><div className="profile-avatar">F</div><div><b>Finora workspace</b><small>{sync.user?"Google account connected":"Your private finance space"}</small></div></div></div>
+  <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Choose local, cloud or hybrid storage from the Storage page.</p></div><div className="profile"><AccountAvatar user={sync.user} size={34}/><div className="finora-sidebar-identity"><b>{sync.user?accountDisplayName(sync.user):"Finora workspace"}</b><small>{sync.user?.email||"Your private finance space"}</small></div></div></div>
  </aside>
  {drawer&&<button className="drawer-shade" aria-label="Close menu" onClick={()=>setDrawer(false)}/>}
  <div className="body-wrap"><header className="top-bar">
   <div className="top-breadcrumb">
    <button className="mobile-menu" type="button" aria-label="Open navigation menu" aria-expanded={drawer} aria-controls="finora-sidebar" onClick={()=>setDrawer(true)}><Menu size={21}/></button>
-   <a className="mobile-brand" href="/" aria-label="Finora homepage"><span className="mobile-brand-mark">f.</span><span className="mobile-brand-word">finora<span>.</span></span></a>
+   <a className="mobile-brand" href="/" aria-label="Finora homepage"><span className="mobile-brand-mark"><BrandMark size={29}/></span><span className="mobile-brand-word">finora<span>.</span></span></a>
    <span className="crumb-root">My workspace</span><ArrowRight className="crumb-arrow" size={14}/><strong className="crumb-current">{label(nav)}</strong>
   </div>
   <div className="top-actions">
@@ -74,7 +78,7 @@ function FinanceApp(){
     <span className="status-dot" aria-hidden="true"/><span className="status-long">{sync.mode==="local"?(w.demo?"Demo · Local":"Local device"):sync.mode==="cloud"?"Cloud storage":"Hybrid sync"}</span><span className="status-short" aria-hidden="true">{sync.mode==="local"?(w.demo?"Demo":"Local"):sync.mode==="cloud"?"Cloud":"Hybrid"}</span>
    </span>
    <button className="icon-outline" type="button" aria-label={dark?"Use light theme":"Use dark theme"} onClick={()=>setDark(v=>!v)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
-   <button className="top-avatar" type="button" onClick={()=>navigate("Storage")} aria-label="Open account and storage settings" title={sync.user?.email||"Account and storage settings"}>{sync.user?.email?.charAt(0).toUpperCase()||"F"}</button>
+   <AccountControls user={sync.user} onSettings={()=>navigate("Storage")} onSignOut={()=>void sync.signOut()} error={sync.error}/>
   </div>
  </header>
  <main className="content-area"><div className="content-top"><div><span className="overline">FINORA / YOUR FINANCIAL COMMAND CENTER</span><h1>{label(nav)}</h1></div><div className="top-utility"><span className="mini-badge">{w.currency}</span><span className="mini-badge">{w.kind==="personal"?"Personal":w.kind==="company"?"Business":"Independent"}</span></div></div>
