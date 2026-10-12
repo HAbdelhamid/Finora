@@ -2,6 +2,19 @@
 
 Finora is a responsive, local-first finance tracker with separate **personal, independent / auto-entrepreneur and company workspaces**.
 
+## User journeys
+
+- **/** — public marketing homepage with product features, workspace examples, privacy details and clear calls to action.
+- **/signup** — create a user account using Google OAuth or email/password.
+- **/login** — sign in using Google or email/password; includes a password reset request.
+- **/auth/callback** — exchanges OAuth and email confirmation PKCE codes; then sends users to **/app**.
+- **/reset-password** — set a new password using a verified recovery session.
+- **/app** — financial dashboard (requires sign-in, or an explicit browser-local or demo choice).
+- **/app?mode=local** — opt into browser-local storage without an account.
+- **/app?demo=1** — explicitly explore sample finances.
+
+First visits to the application are guided toward an **empty** personal, auto-entrepreneur or company workspace. The sample workspace stays separate and remains opt-in. Existing financial snapshots are never automatically deleted by onboarding.
+
 ## What works
 
 - **Dashboard:** Interactive Apache ECharts 6 cash-flow trends, spending mix and allocation; monthly income and expenses; account balances, budgets, goals and activity feed.
@@ -32,7 +45,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. **Sample values are fictitious.** Open Workspaces → Create another workspace to track your own data.
+Open http://localhost:3000 for the public landing page. Use **Get started** or **Sign in** for an account, **Continue locally** without one, or **Explore demo** to view fictitious data. After choosing your mode, use the app at `/app`.
 
 Quality commands:
 
@@ -51,8 +64,9 @@ Local tracking requires **zero credentials**. For cloud or hybrid, configure a d
 2. Supabase → **Authentication → Providers → Google**: enable Google. Create OAuth client credentials in Google Cloud Console, and supply the credentials **inside Supabase**, not in Finora's repository.
 3. In Google Cloud's OAuth application add the **authorized redirect URI** `https://YOUR-PROJECT-REF.supabase.co/auth/v1/callback` (copy the exact URI shown by Supabase).
 4. Supabase → Authentication → URL Configuration: set Site URL `https://finora-nine-self.vercel.app`, and add allowed redirect URLs `https://finora-nine-self.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`. Include the exact preview domain only if you want to test OAuth on previews.
-5. Vercel Finora → Settings → Environment Variables: add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the **public publishable/anon** key, **never** service_role). Add them for production and desired preview environments. Redeploy. Locally, create a **git-ignored** `.env.local` from `.env.example`.
-6. Open **Storage** in Finora, sign in with Google, select **Cloud** or **Both** and verify Sync health. It does not automatically upload existing local records on sign-in; you must opt into a cloud mode explicitly.
+5. **Email/password sign-up:** Supabase → Authentication → Providers → Email should be enabled. Use Supabase's email-confirmation defaults and configure a production SMTP provider and email templates before launching publicly. Add the redirect URL `https://finora-nine-self.vercel.app/auth/callback?flow=recovery` for password resets (and `http://localhost:3000/auth/callback?flow=recovery` if testing locally). The Auth callback uses a verified Supabase session before redirecting to reset-password.
+6. Vercel Finora → Settings → Environment Variables: add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the **public publishable/anon** key, **never** service_role). Add them for production and desired preview environments. Redeploy. Locally, create a **git-ignored** `.env.local` from `.env.example`.
+7. Open **Storage** in Finora, sign in with Google, select **Cloud** or **Both** and verify Sync health. It does not automatically upload existing local records on sign-in; you must opt into a cloud mode explicitly.
 
 ### Storage modes and safety
 
@@ -66,7 +80,7 @@ Storage mode is remembered **per browser**. Cloud data is tied to the signed-in 
 
 **Critical:** browser localStorage is not a folder on your hard drive; deleting browser data or using private mode can delete records. Export JSON backups regularly. Cloud-only mode must be online to reliably save edits; a failed request is visibly reported, and refreshing before a successful sync may lose pending changes.
 
-**Google sign-in will not work until you complete Supabase / Google / Vercel configuration.** This repo contains no OAuth client secret, bank tokens, or privileged API keys.
+**Google sign-in and email/password require correctly configured Supabase Auth / Vercel variables and redirects.** This repo contains no OAuth client secret, bank tokens, or privileged API keys.
 
 ## Calculations and important limitations
 

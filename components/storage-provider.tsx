@@ -129,7 +129,7 @@ export function StorageProvider({children}:{children:ReactNode}){
   setError("");
   if(next==="local"){commitMode("local");setConflict(null);setStatus("local");setReady(true);return}
   if(!cloudConfigured){setError("Cloud setup is unavailable. Configure Supabase and Google sign-in first.");return}
-  if(!user){setError("Sign in with Google before choosing cloud or hybrid storage.");return}
+  if(!user){setError("Sign in with Google or email before choosing cloud or hybrid storage.");return}
   setStatus("loading");
   try{
    const remote=await loadCloudSnapshot(user.id);
@@ -180,6 +180,8 @@ export function StorageProvider({children}:{children:ReactNode}){
    return setError("There are unsaved cloud-only changes. Wait for sync or download a backup before signing out.");
   await signOutCloud();setUser(null);revRef.current=0;lastSyncedRef.current="";
   if(mode==="cloud"){suspendRef.current=true;useFinance.getState().reset();suspendRef.current=false}
+  sessionStorage.removeItem("finora-entry-choice");
+  window.location.assign("/");
  }catch(e){setError(e instanceof Error?e.message:"Sign out failed.")}};
  const blocked=mode==="cloud"&&(!user||!ready);
  return <CloudContext.Provider value={{mode,ready,configured:cloudConfigured,user,status,error,conflict,chooseMode,syncNow,resolveConflict,signIn,signOut}}>
@@ -199,7 +201,7 @@ export function StorageProvider({children}:{children:ReactNode}){
     <button className="btn btn-outline" onClick={()=>void resolveConflict("local")}>Replace cloud with this device's version</button>
     {error&&<p className="warning-text">{error}</p>}
    </div></div>}
-  {!conflict&&blocked&&<div className="cloud-lock" role="status"><div className="cloud-lock-card"><div className="lock-mark">f.</div><h2>{!user?"Your cloud workspace is locked":"Opening your cloud vault"}</h2><p>{!user?"Sign in with Google to access your saved workspaces and transactions. Your data is private to your account.":status==="loading"?"Fetching your encrypted-transport cloud snapshot…":error||"Choose a version to continue."}</p>{!user&&<button className="btn btn-primary" onClick={()=>void signIn()}>Sign in with Google</button>}<button className="btn btn-outline" onClick={()=>void chooseMode("local")}>Use this browser instead</button>{error&&<p className="warning-text">{error}</p>}</div></div>}
+  {!conflict&&blocked&&<div className="cloud-lock" role="status"><div className="cloud-lock-card"><div className="lock-mark">f.</div><h2>{!user?"Your cloud workspace is locked":"Opening your cloud vault"}</h2><p>{!user?"Sign in with Google or email to access your saved workspaces and transactions. Your data is private to your account.":status==="loading"?"Fetching your encrypted-transport cloud snapshot…":error||"Choose a version to continue."}</p>{!user&&<button className="btn btn-primary" onClick={()=>void signIn()}>Sign in with Google</button>}{!user&&<a className="btn btn-outline" href="/login">Sign in with email</a>}<button className="btn btn-outline" onClick={()=>void chooseMode("local")}>Use this browser instead</button>{error&&<p className="warning-text">{error}</p>}</div></div>}
  </CloudContext.Provider>;
 }
 export function useStorage(){const value=useContext(CloudContext);if(!value)throw Error("StorageProvider is missing");return value}
