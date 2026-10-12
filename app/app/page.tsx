@@ -1,10 +1,11 @@
 "use client";
 import {FinoraSelect} from "@/components/ui/finora-select";
 import {useCallback,useEffect,useRef,useState} from "react";
-import {Activity,ArrowRight,BookOpen,BriefcaseBusiness,Building2,CalendarDays,ChartNoAxesCombined,ChevronDown,Cloud,Command,FileChartColumn,Landmark,LayoutDashboard,Menu,Moon,Plus,Settings2,ShieldCheck,Sun,Target,UserRound,WalletCards,X} from "lucide-react";
+import {Activity,ArrowRight,BookOpen,BriefcaseBusiness,Building2,CalendarDays,ChartNoAxesCombined,ChevronDown,Cloud,Command,FileChartColumn,Landmark,LayoutDashboard,Repeat2,Menu,Moon,Plus,Settings2,ShieldCheck,Sun,Target,UserRound,WalletCards,X} from "lucide-react";
 import {useFinance} from "@/lib/finance-store";
 import {Overview} from "@/components/overview";
 import {Transactions} from "@/components/transactions";
+import {Subscriptions} from "@/components/subscriptions";
 import {Planning} from "@/components/planning";
 import {Accounts} from "@/components/accounts";
 import {Investments} from "@/components/investments";
@@ -24,6 +25,7 @@ import {accountDisplayName} from "@/lib/account-profile";
 const links=[
  {name:"Overview",icon:LayoutDashboard,group:"WORKSPACE"},
  {name:"Transactions",icon:Activity,group:"WORKSPACE"},
+ {name:"Subscriptions",icon:Repeat2,group:"WORKSPACE"},
  {name:"Planning",icon:Target,group:"WORKSPACE"},
  {name:"Accounts",icon:WalletCards,group:"WORKSPACE"},
  {name:"Investments",icon:ChartNoAxesCombined,group:"INSIGHTS"},
@@ -85,6 +87,7 @@ function FinanceApp(){
  <main className="content-area"><div className="content-top"><div><span className="overline">FINORA / YOUR FINANCIAL COMMAND CENTER</span><h1>{label(nav)}</h1></div><div className="top-utility"><span className="mini-badge">{w.currency}</span><span className="mini-badge">{w.kind==="personal"?"Personal":w.kind==="company"?"Business":"Independent"}</span></div></div>
  {nav==="Overview"&&<Overview navigate={navigate} openNew={()=>navigate("Transactions")}/>}
  {nav==="Transactions"&&<Transactions/>}
+ {nav==="Subscriptions"&&<Subscriptions/>}
  {nav==="Planning"&&<Planning/>}
  {nav==="Accounts"&&<Accounts/>}
  {nav==="Investments"&&<Investments/>}
