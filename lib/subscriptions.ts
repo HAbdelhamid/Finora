@@ -62,6 +62,6 @@ export function advanceRenewalAfter(due:string,cycle:SubscriptionCycle,paidAt:st
 export function subscriptionMetrics(items:Subscription[]) {
  const active=items.filter(s=>s.status==="active"||s.status==="trial");
  return {activeCount:active.length,
-  monthlyCost:Math.round(active.reduce((sum,s)=>sum+monthlyEquivalent(s.amount,s.cycle),0)*100)/100,
-  annualCost:Math.round(active.reduce((sum,s)=>sum+yearlyEquivalent(s.amount,s.cycle),0)*100)/100};
+  monthlyCost:Math.round(active.reduce((sum,s)=>sum+monthlyEquivalent(s.amount*s.conversionRate,s.cycle),0)*100)/100,
+  annualCost:Math.round(active.reduce((sum,s)=>sum+yearlyEquivalent(s.amount*s.conversionRate,s.cycle),0)*100)/100};
 }

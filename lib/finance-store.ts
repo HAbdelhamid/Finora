@@ -52,7 +52,7 @@ const storedSchema=z.object({
   id:z.string(),workspaceId:z.string(),accountId:z.string(),
   name:z.string(),provider:z.string(),plan:z.string(),
   category:z.enum(["mobile","internet","software","ai_tools","streaming","cloud","insurance","other"]),
-  amount:z.number().nonnegative(),cycle:z.enum(["weekly","monthly","quarterly","yearly"]),
+  amount:z.number().nonnegative(),currency:z.string().default("MAD"),conversionRate:z.number().positive().default(1),cycle:z.enum(["weekly","monthly","quarterly","yearly"]),
   nextRenewal:z.string(),status:z.enum(["active","trial","paused","cancelled"]),
   autoRenew:z.boolean(),website:z.string(),notes:z.string(),lastPaidDate:z.string().optional()
  })).default([])
@@ -98,18 +98,18 @@ export const useFinance = create<FinanceStore>()(persist((set,get)=>({
  addRecurring:(v)=>{if(!isPositive(v.amount))return;set(s=>({recurring:[...s.recurring,{...v,id:uid()}]}))},
  removeRecurring:(id)=>set(s=>({recurring:s.recurring.filter(x=>x.id!==id)})),
  addSubscription:(v)=>{
-  if(!isPositive(v.amount)||!get().accounts.some(a=>a.id===v.accountId&&a.workspaceId===v.workspaceId))return;
+  if(!isPositive(v.amount)||!isPositive(v.conversionRate)||!get().accounts.some(a=>a.id===v.accountId&&a.workspaceId===v.workspaceId))return;
   set(s=>({subscriptions:[...s.subscriptions,{...v,id:uid()}]}));
  },
  updateSubscription:(id,patch)=>set(s=>({subscriptions:s.subscriptions.map(sub=>sub.id===id?{...sub,...patch,id:sub.id,workspaceId:sub.workspaceId}:sub)})),
  removeSubscription:(id)=>set(s=>({subscriptions:s.subscriptions.filter(sub=>sub.id!==id)})),
  recordSubscriptionPayment:(id,date)=>{
   const sub=get().subscriptions.find(s=>s.id===id);
-  if(!sub||!["active","trial"].includes(sub.status)||sub.lastPaidDate===sub.nextRenewal||!get().accounts.some(a=>a.id===sub.accountId&&a.workspaceId===sub.workspaceId)||!isPositive(sub.amount)||!date||sub.nextRenewal>date)return false;
+  if(!sub||!["active","trial"].includes(sub.status)||sub.lastPaidDate===sub.nextRenewal||!get().accounts.some(a=>a.id===sub.accountId&&a.workspaceId===sub.workspaceId)||!isPositive(sub.amount)||!isPositive(sub.conversionRate)||!date||sub.nextRenewal>date)return false;
   const next=advanceRenewalAfter(sub.nextRenewal,sub.cycle,date);
   set(s=>({
    subscriptions:s.subscriptions.map(x=>x.id===id?{...x,nextRenewal:next,lastPaidDate:sub.nextRenewal,status:x.status==="trial"?"active":x.status}:x),
-   transactions:[{id:uid(),workspaceId:sub.workspaceId,accountId:sub.accountId,type:"expense",amount:sub.amount,category:"Subscriptions",description:[sub.provider,sub.plan].filter(Boolean).join(" · ")||sub.name,date},...s.transactions]
+   transactions:[{id:uid(),workspaceId:sub.workspaceId,accountId:sub.accountId,type:"expense",amount:Math.round(sub.amount*sub.conversionRate*100)/100,category:"Subscriptions",description:[sub.provider,sub.plan].filter(Boolean).join(" · ")+" ("+sub.amount+" "+sub.currency+")",date},...s.transactions]
   }));
   return true;
  },

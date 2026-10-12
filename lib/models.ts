@@ -64,7 +64,7 @@ export type SubscriptionCategory = "mobile" | "internet" | "software" | "ai_tool
 export interface Subscription {
  id: string; workspaceId: string; accountId: string;
  name: string; provider: string; plan: string;
- category: SubscriptionCategory; amount: number; cycle: SubscriptionCycle;
+ category: SubscriptionCategory; amount: number; currency: string; conversionRate: number; cycle: SubscriptionCycle;
  nextRenewal: string; status: SubscriptionStatus;
  autoRenew: boolean; website: string; notes: string;
  lastPaidDate?: string;

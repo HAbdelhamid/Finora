@@ -139,7 +139,7 @@ export function buildPremiumStatement(doc:jsPDF,data:PremiumStatementInput):void
  doc.text("Estimated monthly: "+money(metrics.monthlyCost,data.currency),X+5,y+10);
  doc.text("Annual: "+money(metrics.annualCost,data.currency),WIDTH-X-5,y+10,{align:"right"});y+=23;
  table(["SERVICE / PLAN","CYCLE","NEXT DATE","PER CYCLE"],[73,33,33,43],subActive.map(s=>({
-  cells:[s.provider+" · "+s.plan,s.cycle,s.nextRenewal,money(s.amount,data.currency)]
+  cells:[s.provider+" · "+s.plan,s.cycle,s.nextRenewal,money(s.amount,s.currency)]
  })),[3]);
  ensure(20);
  doc.setFont("helvetica","italic");doc.setFontSize(7.5);text(doc,C.muted);

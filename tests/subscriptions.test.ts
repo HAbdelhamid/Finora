@@ -36,7 +36,7 @@ describe("backward compatible subscriptions",()=>{
   const before=state.transactions.length;
   state.addSubscription({workspaceId:account.workspaceId,accountId:account.id,
    name:"Claude Code",provider:"Anthropic",plan:"Pro",category:"ai_tools",
-   amount:200,cycle:"monthly",nextRenewal:"2026-10-01",status:"active",
+   amount:200,currency:"MAD",conversionRate:1,cycle:"monthly",nextRenewal:"2026-10-01",status:"active",
    autoRenew:true,website:"https://example.com",notes:"Coding assistant"});
   const snapshot=getFinoraSnapshot();
   expect(snapshot.subscriptions[0]).toMatchObject({provider:"Anthropic",plan:"Pro",category:"ai_tools",amount:200});
@@ -46,7 +46,7 @@ describe("backward compatible subscriptions",()=>{
  it("books a due payment once and moves the renewal forward",()=>{
   const state=useFinance.getState(),account=state.accounts[0];
   state.addSubscription({workspaceId:account.workspaceId,accountId:account.id,name:"Home internet",
-   provider:"Provider",plan:"Fiber",category:"internet",amount:300,cycle:"monthly",
+   provider:"Provider",plan:"Fiber",category:"internet",amount:300,currency:"MAD",conversionRate:1,cycle:"monthly",
    nextRenewal:"2026-01-01",status:"active",autoRenew:true,website:"",notes:""});
   const before=useFinance.getState().transactions.length;
   const id=useFinance.getState().subscriptions[0].id;
@@ -60,7 +60,7 @@ describe("backward compatible subscriptions",()=>{
   const seed=makeSeed();
   const sub=(status:"active"|"paused")=>({
    id:status,workspaceId:seed.activeId,accountId:seed.accounts[0].id,name:"A",
-   provider:"A",plan:"B",amount:120,cycle:"monthly" as const,category:"software" as const,
+   provider:"A",plan:"B",amount:120,currency:"MAD",conversionRate:1,cycle:"monthly" as const,category:"software" as const,
    nextRenewal:"2026-10-01",status,autoRenew:true,website:"",notes:""
   });
   expect(subscriptionMetrics([sub("active"),sub("paused")]).monthlyCost).toBe(120);

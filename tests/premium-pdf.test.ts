@@ -27,7 +27,7 @@ describe("premium monthly PDF statement",()=>{
   const doc=new jsPDF({unit:"mm",format:"a4"});
   expect(()=>buildPremiumStatement(doc,{...base,transactions:[],subscriptions:[{
    id:"sub-1",workspaceId:"w",accountId:"test",name:"AI assistant",provider:"Anthropic",
-   plan:"Pro",category:"ai_tools",amount:200,cycle:"monthly",nextRenewal:"2026-10-20",
+   plan:"Pro",category:"ai_tools",amount:200,currency:"MAD",conversionRate:1,cycle:"monthly",nextRenewal:"2026-10-20",
    status:"active",autoRenew:true,website:"",notes:""
   }]})).not.toThrow();
   expect(doc.getNumberOfPages()).toBeGreaterThanOrEqual(1);
