@@ -486,3 +486,5 @@ html[data-theme=dark] .finora-dialog-icon.danger{background:#4b2e37;color:#ffadb
 
 /* Portal dropdowns must render above the subscription editor overlay. */
 .subscription-editor-backdrop ~ .finora-select-popover,.finora-select-popover{z-index:9500}
+
+.subscription-base-currency{font-size:11px;color:var(--muted);border:1px dashed var(--border);border-radius:10px;padding:12px;align-self:end;line-height:1.7;background:var(--input)}
