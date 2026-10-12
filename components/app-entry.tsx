@@ -18,12 +18,21 @@ export function AppEntry({children}:{children:ReactNode}){
   let alive=true;
   const params=new URLSearchParams(window.location.search);
   const requested=params.get("demo")==="1"?"demo":params.get("mode")==="local"?"local":null;
-  if(requested){sessionStorage.setItem(ACCESS_KEY,requested);window.history.replaceState(null,"",window.location.pathname);setAccess(requested);return}
+  if(requested){
+   sessionStorage.setItem(ACCESS_KEY,requested);
+   if(requested==="demo"&&useFinance.getState().workspaces.some(w=>w.id==="demo-personal")){
+    useFinance.getState().select("demo-personal");
+   }
+   window.history.replaceState(null,"",window.location.pathname);setAccess(requested);return;
+  }
   const saved=sessionStorage.getItem(ACCESS_KEY);
-  if(saved==="demo"||saved==="local"){setAccess(saved);return}
   const cloud=getSupabase();
-  if(!cloud){setAccess("none");return}
-  cloud.auth.getUser().then(({data})=>{if(alive)setAccess(data.user?"signed":"none")}).catch(()=>{if(alive)setAccess("none")});
+  if(!cloud){setAccess(saved==="demo"||saved==="local"?saved:"none");return}
+  cloud.auth.getUser().then(({data})=>{
+   if(!alive)return;
+   // A verified sign-in takes precedence over a stale, tab-local demo preference.
+   setAccess(data.user?"signed":saved==="demo"||saved==="local"?saved:"none");
+  }).catch(()=>{if(alive)setAccess(saved==="demo"||saved==="local"?saved:"none")});
   return()=>{alive=false};
  },[]);
  const choose=(choice:"demo"|"local")=>{sessionStorage.setItem(ACCESS_KEY,choice);setAccess(choice);setStarting(choice==="demo")};
