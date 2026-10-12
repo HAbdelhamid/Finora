@@ -1,4 +1,5 @@
 "use client";
+import {FinoraSelect} from "@/components/ui/finora-select";
 import {useCallback,useEffect,useRef,useState} from "react";
 import {Activity,ArrowRight,BookOpen,BriefcaseBusiness,Building2,CalendarDays,ChartNoAxesCombined,ChevronDown,Cloud,Command,FileChartColumn,Landmark,LayoutDashboard,Menu,Moon,Plus,Settings2,ShieldCheck,Sun,Target,UserRound,WalletCards,X} from "lucide-react";
 import {useFinance} from "@/lib/finance-store";
@@ -61,7 +62,7 @@ function FinanceApp(){
   <div className="wordmark"><div className="wordmark-symbol"><BrandMark size={38}/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
   <div className="workspace-caption">ACTIVE WORKSPACE</div>
   <div className="workspace-switch" data-tour="workspace"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
-   <select aria-label="Switch workspace" title="Switch workspace" value={w.id} onChange={e=>s.select(e.target.value)}>{s.workspaces.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
+   <FinoraSelect aria-label="Switch workspace" title="Switch workspace" value={w.id} onChange={e=>s.select(e.target.value)}>{s.workspaces.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</FinoraSelect></div>
   <div className="nav-scroll-wrap"><div ref={navRef} className="side-scroll">{["WORKSPACE","INSIGHTS","MANAGE"].map(group=><div className="nav-group" key={group}><div className="nav-group-title">{group}</div>{links.filter(x=>x.group===group).map(x=><button className={"side-link "+(nav===x.name?"active":"")} key={x.name} onClick={()=>navigate(x.name)}><x.icon size={18} strokeWidth={1.9}/><span>{label(x.name)}</span>{nav===x.name&&<span className="active-indicator"/>}</button>)}</div>)}</div>{navHasMore&&<button className="nav-more" aria-label="More navigation below" onClick={()=>navRef.current?.scrollBy({top:190,behavior:"smooth"})}>Scroll for more <ChevronDown size={14}/></button>}</div>
   <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Choose local, cloud or hybrid storage from the Storage page.</p></div><div className="profile"><AccountAvatar user={sync.user} size={34}/><div className="finora-sidebar-identity"><b>{sync.user?accountDisplayName(sync.user):"Finora workspace"}</b><small>{sync.user?.email||"Your private finance space"}</small></div></div></div>
  </aside>

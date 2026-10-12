@@ -9,6 +9,14 @@ Once you've chosen to sign in, use demo, or work locally, Finora offers a small 
 
 The guide is not an accounting assistant and does **not** create, edit, or upload financial records. It changes only the visible page and mobile menu during explanations. The invitation is remembered per browser and per signed-in user; no tour preferences are stored in your financial snapshots. It never interrupts the marketing site, login or initial workspace creation screens.
 
+## Consistent form design and feedback
+
+Finora uses the same modern, keyboard-accessible dropdowns for workspace switching, account selection, categories, finance types, currencies and Zakat preferences. Lists open in a viewport-aware overlay, support arrow keys, Enter, Escape, Home/End, and offer in-menu search for longer collections. The visual style follows light/dark themes and works on mobile.
+
+Forms use browser constraint validation with branded error notifications and error outlines, rather than browser alert boxes. A shared toast system displays successful saves and errors. Potentially destructive operations (deleting transactions, resetting data, restoring backups) use explicit, keyboard-accessible confirmation dialogs. Numeric edits such as investment prices, savings progress and debt repayments use validated in-app number dialogs.
+
+These controls do not alter financial calculations or storage behavior. Back up your records before any destructive data operation.
+
 ## User journeys
 
 - **/** — public marketing homepage with product features, workspace examples, privacy details and clear calls to action.

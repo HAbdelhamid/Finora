@@ -299,3 +299,126 @@ html[data-theme=dark] .finora-account-menu-actions>.signout:hover{background:#52
 }
 
 .finora-local-signout-note{font-size:10px;color:var(--muted);line-height:1.5;background:var(--input);margin:10px 0 0;padding:10px;border-radius:8px}
+
+
+
+/* ---------------------------------------------------------------------
+   Finora interface system: cohesive interactive fields, command menus,
+   feedback and safer confirmations across all finance workspaces.
+   --------------------------------------------------------------------- */
+.finora-select-trigger{
+  width:100%;min-width:0;min-height:44px;padding:10px 13px 10px 14px;
+  border:1px solid var(--border);border-radius:11px;
+  background:var(--input);color:var(--ink);
+  box-shadow:inset 0 1px 0 #ffffff13,0 1px 1px #0a293008;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  text-align:left;font-size:12px;font-weight:750;letter-spacing:-.15px;
+  transition:border-color .16s,box-shadow .16s,background .16s;
+}
+.finora-select-trigger:hover:not(:disabled){background:var(--paper);border-color:#88cbb9}
+.finora-select-trigger[aria-expanded="true"],.finora-select-trigger:focus-visible{
+ border-color:#11ad89;box-shadow:0 0 0 3px #11ae8a20;outline:none;
+}
+.finora-select-trigger:disabled{cursor:not-allowed;opacity:.5}
+.finora-select-value{display:block;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.finora-select-value.empty{color:var(--muted)}
+.finora-select-chevron{color:#82a49a;flex-shrink:0;transition:transform .2s,color .2s}
+.finora-select-chevron.expanded{transform:rotate(180deg);color:#0da683}
+.finora-select-popover{position:fixed;z-index:5500;display:flex;flex-direction:column;overflow:hidden;
+ background:var(--paper);color:var(--ink);border:1px solid var(--border);
+ border-radius:13px;box-shadow:0 24px 70px #0a2a2a35,0 5px 15px #0a2a2a16;
+ animation:finora-menu-in .15s cubic-bezier(.2,.7,.2,1)}
+@keyframes finora-menu-in{from{opacity:0;transform:translateY(-4px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.finora-select-search{display:flex;align-items:center;gap:9px;margin:8px 8px 3px;padding:0 11px;
+ min-height:38px;border:1px solid var(--border);border-radius:9px;background:var(--input);color:var(--muted)}
+.finora-select-search:focus-within{border-color:#13aa83;box-shadow:0 0 0 3px #13aa8320}
+.finora-select-search input{background:transparent!important;border:0!important;box-shadow:none!important;
+ font-size:12px!important;padding:0!important;min-height:36px!important;outline:0!important;
+ width:100%;color:var(--ink)!important}
+.finora-select-options{overflow-y:auto;overscroll-behavior:contain;padding:5px;min-height:0;scrollbar-width:thin}
+.finora-select-option{width:100%;min-height:38px;border:0;border-radius:8px;background:transparent;
+ color:var(--ink);display:flex;align-items:center;justify-content:space-between;
+ gap:10px;padding:9px 11px;font-size:11.5px;font-weight:700;text-align:left}
+.finora-select-option>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.finora-select-option svg{flex-shrink:0;color:#12a787}
+.finora-select-option.highlighted,.finora-select-option:hover{background:var(--green-soft);color:#0a7d66}
+.finora-select-option.selected{font-weight:900;color:#0a997b}
+.finora-select-option:focus-visible{outline:2px solid #44c5a3;outline-offset:-2px}
+.finora-select-empty{text-align:center;color:var(--muted);font-size:12px;padding:18px 10px}
+.workspace-switch .finora-select-trigger{position:absolute;inset:0;opacity:0;width:100%;height:100%;border:0;
+ padding:0;cursor:pointer;z-index:2}
+.workspace-switch:focus-within{outline:2px solid #5ce4bd;outline-offset:2px}
+/* Keep native keyboard/date controls and typed input appearances coordinated. */
+.stack-form input:not([type=checkbox]):not([type=file]),.surface input:not([type=checkbox]):not([type=file]),
+.onboarding-label input,.auth-input-wrap,.finora-dialog-form input{
+ border-radius:11px;transition:border-color .16s,box-shadow .16s,background .16s;
+}
+.stack-form input:not([type=checkbox]):focus,.surface input:not([type=checkbox]):focus,
+.finora-dialog-form input:focus,.onboarding-label input:focus{
+ outline:0;border-color:#15ae8c;box-shadow:0 0 0 3px #13ad8920;background:var(--paper);
+}
+input[aria-invalid="true"],textarea[aria-invalid="true"],.stack-form input:user-invalid,
+.surface input:user-invalid,.auth-form input:user-invalid{
+ border-color:#e28185!important;box-shadow:0 0 0 3px #e2818518!important;
+}
+input:user-invalid:focus{outline:0}
+.finora-input-error{display:block;margin-top:3px;font-size:11px;color:#bf4f58;line-height:1.5}
+
+/* Non-blocking, dismissible toast notifications. */
+.finora-toast-stack{position:fixed;top:16px;right:18px;z-index:8500;
+ width:min(400px,calc(100vw - 30px));display:grid;gap:9px;pointer-events:none}
+.finora-toast{pointer-events:auto;display:flex;align-items:flex-start;gap:12px;
+ color:var(--ink);background:var(--paper);border:1px solid var(--border);
+ border-radius:13px;padding:14px 12px 13px 14px;box-shadow:0 15px 45px #071d2040;
+ border-left:3px solid #16af88;animation:finora-toast-in .22s ease both}
+.finora-toast.error{border-left-color:#dc777b}.finora-toast.info{border-left-color:#6e93d5}
+.finora-toast-icon{color:#109b79;margin-top:1px}.finora-toast.error .finora-toast-icon{color:#d3636d}
+.finora-toast.info .finora-toast-icon{color:#7193d1}
+.finora-toast p{margin:0;flex:1;font-size:12px;font-weight:750;line-height:1.65;overflow-wrap:anywhere}
+.finora-toast button{display:grid;place-items:center;background:var(--input);border:0;border-radius:7px;
+ color:var(--muted);width:26px;height:26px;flex-shrink:0}
+.finora-toast button:hover{background:var(--green-soft);color:var(--ink)}
+@keyframes finora-toast-in{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Confirmation & numeric entry: consistent, touch-friendly, keyboard accessible. */
+.finora-dialog-backdrop{position:fixed;inset:0;z-index:8000;background:#061c22ad;
+ backdrop-filter:blur(5px);display:grid;place-items:center;padding:16px;animation:finora-fade .16s ease both}
+@keyframes finora-fade{from{opacity:0}to{opacity:1}}
+.finora-dialog{position:relative;background:var(--paper);color:var(--ink);border:1px solid var(--border);
+ border-radius:21px;box-shadow:0 40px 100px #071a1f55;width:min(450px,100%);max-height:calc(100dvh - 32px);
+ overflow-y:auto;padding:29px;outline:0;animation:finora-menu-in .18s ease both}
+.finora-dialog-icon{width:49px;height:49px;background:var(--green-soft);color:#10a586;
+ border-radius:15px;display:grid;place-items:center;margin-bottom:19px}
+.finora-dialog-icon.danger{background:#fff0f0;color:#d0646b}
+.finora-dialog-close{position:absolute;right:17px;top:17px;border:0;width:33px;height:33px;
+ color:var(--muted);background:var(--input);border-radius:9px;display:grid;place-items:center}
+.finora-dialog-close:hover{background:var(--green-soft);color:var(--ink)}
+.finora-dialog h2{font-size:21px;line-height:1.3;font-weight:900;letter-spacing:-.65px;margin:0 30px 9px 0}
+.finora-dialog>p{font-size:12px;color:var(--muted);line-height:1.8;margin:0 0 23px}
+.finora-dialog-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px}
+.finora-dialog-actions button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;
+ padding:10px 17px;border-radius:10px;font-size:12px;font-weight:850;flex:1}
+.finora-dialog-cancel{border:1px solid var(--border);background:var(--input);color:var(--ink)}
+.finora-dialog-cancel:hover{background:var(--paper)}
+.finora-dialog-accept{border:1px solid #0fa27f;background:#0fa27f;color:white}
+.finora-dialog-accept:hover{background:#087e64}
+.finora-dialog-accept.danger{background:#c74f5c;border-color:#c74f5c}
+.finora-dialog-accept.danger:hover{background:#a43645}
+.finora-dialog-form{display:grid;gap:9px;margin-top:20px}
+.finora-dialog-form label{font-size:11px;font-weight:800;color:var(--muted)}
+.finora-dialog-form input{background:var(--input);border:1px solid var(--border);outline:0;border-radius:11px;
+ width:100%;min-height:48px;padding:12px;color:var(--ink);font-size:14px}
+.finora-dialog-form .finora-dialog-actions{margin-top:15px}
+@media(max-width:600px){
+ .finora-toast-stack{top:calc(10px + env(safe-area-inset-top));right:12px;width:calc(100vw - 24px)}
+ .finora-dialog{padding:22px;border-radius:16px}
+ .finora-select-popover{border-radius:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .finora-select-popover,.finora-toast,.finora-dialog,.finora-dialog-backdrop{animation:none!important}
+ .finora-select-chevron{transition:none}
+}
+html[data-theme=dark] .finora-select-option.highlighted,
+html[data-theme=dark] .finora-select-option:hover{color:#c3f6df;background:#205143}
+html[data-theme=dark] .finora-select-option.selected{color:#80e6c5}
+html[data-theme=dark] .finora-dialog-icon.danger{background:#4b2e37;color:#ffadb2}
