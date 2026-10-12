@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@fontsource-variable/manrope";
 import "./globals.css";
+import {FinoraUiProvider} from "@/components/ui/finora-feedback";
 
 export const metadata: Metadata = {
   title: "Finora — Your financial command center",
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({children}:Readonly<{children:React.ReactNode}>) {
-  return <html lang="en" suppressHydrationWarning><body>{children}</body></html>;
+  return <html lang="en" suppressHydrationWarning><body><FinoraUiProvider>{children}</FinoraUiProvider></body></html>;
 }
