@@ -35,6 +35,8 @@ function FinanceApp(){
  const navRef=useRef<HTMLDivElement>(null);
  const sync=useStorage();
  const s=useFinance();
+ // React hooks must run in the same order on the loading and ready renders.
+ const navigate=useCallback((screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"instant"})},[]);
  useEffect(()=>setMounted(true),[]);
  useEffect(()=>{if(mounted){document.documentElement.dataset.theme=dark?"dark":"light"}},[mounted,dark]);
  useEffect(()=>{
@@ -49,7 +51,6 @@ function FinanceApp(){
  },[mounted]);
  if(!mounted)return <div className="boot-screen"><span className="boot-logo">f<span>.</span></span><p>Preparing your financial command center…</p></div>;
  const w=s.workspaces.find(x=>x.id===s.activeId)||s.workspaces[0];
- const navigate=useCallback((screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"instant"})},[]);
  const navIcon=(kind:string)=>kind==="personal"?<UserRound size={16}/>:kind==="freelance"?<BriefcaseBusiness size={16}/>:<Building2 size={16}/>;
  return <div className="app-shell">
  <aside id="finora-sidebar" className={"side-panel "+(drawer?"side-open":"")}>

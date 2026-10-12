@@ -16,6 +16,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Type-check
         run: npm run typecheck
+      - name: Prevent React hook-order regressions
+        run: npx eslint --no-config-lookup --parser @typescript-eslint/parser --plugin react-hooks --rule "react-hooks/rules-of-hooks:error" app/app/page.tsx
       - name: Unit tests
         run: npm test
       - name: Build
