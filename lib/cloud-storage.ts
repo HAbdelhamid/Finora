@@ -59,7 +59,7 @@ export async function googleSignIn():Promise<void>{
  const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
  if(url&&key){
   try {
-   const res=await fetch(url.replace(/\\/$/,"")+"/auth/v1/settings",{
+   const res=await fetch((url.endsWith("/")?url.slice(0,-1):url)+"/auth/v1/settings",{
     headers:{apikey:key},cache:"no-store"
    });
    if(res.ok){
