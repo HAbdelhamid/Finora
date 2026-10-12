@@ -1,0 +1,34 @@
+"use client";
+import { useState } from "react";
+import { ArrowDownLeft,ArrowLeftRight,ArrowUpRight,CalendarDays,Plus,Search,Trash2 } from "lucide-react";
+import { useFinance } from "@/lib/finance-store";
+import { expenseCategories,formatMoney,incomeCategories,today } from "@/lib/models";
+import { balanceFor,workspaceItems } from "@/lib/ledger";
+import { Card } from "./widgets";
+
+export function Transactions(){
+ const store=useFinance(),ws=store.workspaces.find(x=>x.id===store.activeId)!,d=workspaceItems(store,ws.id);
+ const [kind,setKind]=useState<"income"|"expense"|"transfer">("expense");
+ const [account,setAccount]=useState(""),[toAccount,setToAccount]=useState("");
+ const [amount,setAmount]=useState(""),[cat,setCat]=useState("Groceries"),[note,setNote]=useState(""),[date,setDate]=useState(today());
+ const [search,setSearch]=useState(""),[filter,setFilter]=useState("all");
+ const [recName,setRecName]=useState(""),[recAmount,setRecAmount]=useState("");
+ const from=d.accounts.some(a=>a.id===account)?account:d.accounts[0]?.id||"";
+ const to=d.accounts.some(a=>a.id===toAccount&&a.id!==from)?toAccount:d.accounts.find(a=>a.id!==from)?.id||"";
+ const categories=kind==="income"?incomeCategories:expenseCategories;
+ const rows=[...d.transactions].filter(t=>(filter==="all"||filter===t.type)&&(t.description+" "+t.category).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>b.date.localeCompare(a.date));
+ const add=(e:React.FormEvent)=>{e.preventDefault();const n=Number(amount);if(!Number.isFinite(n)||n<=0||!from)return;if(kind==="transfer"&&(!to||to===from))return alert("Choose a different destination account");
+ store.addTransaction({workspaceId:ws.id,accountId:from,toAccountId:kind==="transfer"?to:undefined,type:kind,amount:n,category:kind==="transfer"?"Transfer":(categories.includes(cat)?cat:categories[0]),description:note.trim()||kind,date});setAmount("");setNote("")};
+ return <div className="page-stack"><div className="section-intro"><h2>Transactions</h2><p>Record revenue and spending with precision. Transfers never distort income and expense reports.</p></div><div className="form-layout">
+ <Card title="New transaction" subtitle="Every entry belongs to this workspace"><form className="stack-form" onSubmit={add}><div className="segmented">{(["expense","income","transfer"] as const).map(k=><button type="button" className={kind===k?"selected":""} onClick={()=>{setKind(k);setCat(k==="income"?"Salary":"Groceries")}} key={k}>{k==="transfer"?"Transfer":k==="expense"?"Expense":"Income"}</button>)}</div>
+ <div className="field-row"><label>Amount · {ws.currency}<input required type="number" step=".01" min=".01" placeholder="0.00" value={amount} onChange={e=>setAmount(e.target.value)}/></label><label>Date<input type="date" required value={date} onChange={e=>setDate(e.target.value)}/></label></div>
+ <label>Account<select value={from} onChange={e=>setAccount(e.target.value)}>{d.accounts.map(a=><option value={a.id} key={a.id}>{a.name} · {formatMoney(balanceFor(a,d.transactions),ws.currency)}</option>)}</select></label>
+ {kind==="transfer"?<label>Destination<select value={to} onChange={e=>setToAccount(e.target.value)}>{d.accounts.filter(a=>a.id!==from).map(a=><option key={a.id} value={a.id}>{a.name}</option>)}</select></label>:<label>Category<select value={categories.includes(cat)?cat:categories[0]} onChange={e=>setCat(e.target.value)}>{categories.map(c=><option key={c}>{c}</option>)}</select></label>}
+ <label>Description<input value={note} onChange={e=>setNote(e.target.value)} placeholder="Salary, rent, groceries..."/></label><button className="btn btn-primary submit-btn" disabled={!from} type="submit"><Plus size={16}/> Record {kind}</button></form></Card>
+ <Card title="Activity ledger" subtitle={rows.length+" matching transactions"} action={<div className="filter-actions"><Search size={16}/><input aria-label="Search transactions" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search"/></div>}><div className="tabs-inline">{["all","income","expense","transfer","debt_out","debt_in"].map(f=><button key={f} className={f===filter?"active":""} onClick={()=>setFilter(f)}>{f==="all"?"All":f.startsWith("debt")?"Debt":f}</button>)}</div><div className="ledger-scroll">
+ {rows.length?rows.map(t=><div className="transaction-line" key={t.id}><div className={"type-icon "+(t.type==="income"||t.type==="debt_in"?"in":"out")}>{t.type==="income"||t.type==="debt_in"?<ArrowDownLeft size={17}/>:t.type==="transfer"?<ArrowLeftRight size={17}/>:<ArrowUpRight size={17}/>}</div><div className="flex-fill"><b>{t.description}</b><small>{t.category} · {t.date}</small></div><strong className={t.type==="income"||t.type==="debt_in"?"value-in":"value-out"}>{t.type==="income"||t.type==="debt_in"?"+":t.type==="transfer"?"↔":"−"}{formatMoney(t.amount,ws.currency)}</strong><button className="icon-btn danger-hover" aria-label="Delete transaction" onClick={()=>{if(confirm("Remove transaction?"))store.removeTransaction(t.id)}}><Trash2 size={15}/></button></div>):<div className="empty-state">No matching transactions found.</div>}</div></Card></div>
+ <Card title="Recurring revenue and bills" subtitle="Rules are reminders; post transactions manually to avoid duplicates." action={<CalendarDays size={20} className="subtle-icon"/>}>
+ {d.recurring.map(r=><div className="recurring-item" key={r.id}><div className="type-icon in"><CalendarDays size={16}/></div><div className="flex-fill"><b>{r.name}</b><small>Day {r.day} · {r.type}</small></div><strong>{formatMoney(r.amount,ws.currency)}</strong><button className="btn btn-quiet" onClick={()=>{const key=today().slice(0,7);if(d.transactions.some(t=>t.description===r.name&&t.date.startsWith(key))&&!confirm("Already posted this month. Post again?"))return;store.addTransaction({workspaceId:ws.id,accountId:r.accountId,type:r.type,amount:r.amount,category:r.category,description:r.name,date:today()})}}>Post now</button><button className="icon-btn danger-hover" onClick={()=>store.removeRecurring(r.id)} aria-label="Delete recurring"><Trash2 size={16}/></button></div>)}
+ <form className="recurring-create" onSubmit={e=>{e.preventDefault();if(!from||+recAmount<=0||!recName.trim())return;store.addRecurring({workspaceId:ws.id,accountId:from,name:recName,amount:Number(recAmount),category:kind==="income"?"Salary":"Subscriptions",type:kind==="income"?"income":"expense",day:1,enabled:true});setRecName("");setRecAmount("")}}><label>Rule name<input required placeholder="Monthly retainer" value={recName} onChange={e=>setRecName(e.target.value)}/></label><label>Amount<input required min=".01" step=".01" type="number" value={recAmount} onChange={e=>setRecAmount(e.target.value)}/></label><button className="btn btn-outline" type="submit"><Plus size={16}/> Add rule</button></form></Card>
+ </div>;
+}
