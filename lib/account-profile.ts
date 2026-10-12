@@ -10,7 +10,10 @@ export function accountDisplayName(user:Account|null|undefined):string {
 }
 
 export function accountInitials(user:Account|null|undefined):string {
- const parts=accountDisplayName(user).split(/\s+/).filter(Boolean);
+ if(!user)return "F";
+ const label=accountDisplayName(user);
+ if(label==="Finora member")return "F";
+ const parts=label.split(/\s+/).filter(Boolean);
  return ((parts.length>1?parts[0][0]+parts[parts.length-1][0]:parts[0]?.[0])||"F").toUpperCase();
 }
 
