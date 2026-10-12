@@ -172,3 +172,59 @@ html[data-theme=dark] .notice-warning{background:#4b3a24;border-color:#8b6734;co
  .top-actions .icon-outline{width:34px;height:34px;flex-basis:34px}
  .top-avatar{flex-basis:32px;width:32px;height:32px}
 }
+
+
+/* Guided product tour: quiet onboarding, accessible controls and spotlight panels. */
+.tour-launcher{position:fixed;right:24px;bottom:23px;z-index:70;min-height:43px;border:1px solid #b6e5d2;background:#fff;color:#137960;border-radius:100px;box-shadow:0 12px 36px #0f463027;display:flex;align-items:center;gap:8px;padding:0 17px;font-size:11px;font-weight:850;white-space:nowrap}
+.tour-launcher:hover{background:#edfbf5;border-color:#49c49f}
+.tour-launcher:focus-visible,.tour-invitation button:focus-visible,.tour-popover button:focus-visible{outline:3px solid #49dcb0;outline-offset:3px}
+.tour-invitation{position:fixed;right:24px;bottom:79px;width:min(350px,calc(100vw - 28px));z-index:71;background:#fff;color:#203d37;border:1px solid #deeee5;box-shadow:0 19px 55px #102f2e38;border-radius:19px;padding:22px 21px 18px;display:grid;gap:9px}
+.tour-invite-icon{width:39px;height:39px;border-radius:12px;background:#dff8ec;color:#059a77;display:grid;place-items:center;margin-bottom:3px}
+.tour-invitation strong{font-size:15px;line-height:1.35;letter-spacing:-.35px;padding-right:17px}
+.tour-invitation p{font-size:11px;line-height:1.7;color:#758e85;margin:0}
+.tour-invite-close{position:absolute;right:12px;top:12px;border:0;background:transparent;color:#859e95;width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
+.tour-invite-close:hover{background:#edf7f2;color:#186b5a}
+.tour-invite-actions{display:flex;justify-content:space-between;gap:7px;align-items:center;margin-top:5px}
+.tour-invite-start{border:0;background:#0da786;color:#fff;border-radius:9px;padding:11px 14px;font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px}
+.tour-invite-later{border:0;background:transparent;color:#7d998e;padding:10px;font-weight:850;font-size:11px}
+.tour-invite-start:hover{background:#087f68}
+.tour-shade-full{position:fixed;inset:0;background:#071c20bd;z-index:4000;pointer-events:none}
+.tour-shade-panels{position:fixed;inset:0;z-index:4000;pointer-events:none}
+.tour-shade-panels>div:not(.tour-spotlight-ring){position:fixed;background:#071c20ba;pointer-events:none}
+.tour-spotlight-ring{position:fixed;pointer-events:none;box-shadow:0 0 0 2px #5ff1bf,0 0 28px #5ff1bf55;outline:1px solid #f4fff4;border-radius:11px;transition:top .17s,left .17s,width .17s,height .17s}
+.tour-interaction-guard{position:fixed;inset:0;z-index:4001;background:transparent;cursor:default}
+.tour-popover{position:fixed;z-index:4002;width:min(365px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;background:#fff;color:#263d3c;border:1px solid #d7eae2;border-radius:17px;box-shadow:0 28px 100px #00181758,0 5px 18px #00181717;padding:20px 21px 18px;outline:none}
+.tour-popover-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.tour-popover-head span{font-size:9px;letter-spacing:1.5px;font-weight:900;color:#0d9b7a;display:inline-flex;gap:7px;align-items:center}
+.tour-close{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;border:0;background:#f1f6f3;color:#718d81}
+.tour-close:hover{color:#194d3e;background:#ddf5eb}
+.tour-progress{background:#e7f1ec;width:100%;height:5px;border-radius:100px;overflow:hidden}
+.tour-progress>div{height:100%;background:linear-gradient(90deg,#0eac85,#6de3b6);border-radius:inherit;transition:width .18s}
+.tour-count{margin:13px 0 8px!important;font-size:10px!important;color:#83a095!important;font-weight:750}
+.tour-popover h2{font-size:20px;line-height:1.25;letter-spacing:-.6px;font-weight:900;margin:0 0 11px}
+.tour-popover #tour-explanation{font-size:12px;line-height:1.8;color:#687f79;margin:0 0 19px}
+.tour-footer{display:flex;gap:11px;align-items:center;justify-content:space-between;padding-top:13px;border-top:1px solid #e7f0ea}
+.tour-skip{border:0;background:transparent;font-size:11px;font-weight:800;color:#879d97;padding:8px 0}
+.tour-skip:hover{color:#294d45}
+.tour-navigation{display:flex;gap:7px;align-items:center}
+.tour-back,.tour-next{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:850;border-radius:9px;min-height:37px;padding:8px 12px;border:1px solid #dcece2}
+.tour-back{background:#fff;color:#577c6f}
+.tour-back:disabled{opacity:.4}
+.tour-next{background:#0aab85;color:white;border-color:#0aab85}
+.tour-next:hover{background:#0a8b70}
+html[data-theme=dark] .tour-launcher{background:#1c3836;color:#baf4dc;border-color:#37675b}
+html[data-theme=dark] .tour-launcher:hover{background:#214c40}
+@media(max-width:800px){
+ .tour-launcher{right:15px;bottom:calc(14px + env(safe-area-inset-bottom));min-height:43px;padding:0 14px}
+ .tour-launcher span{display:none}
+ .tour-invitation{right:14px;bottom:calc(72px + env(safe-area-inset-bottom))}
+ .tour-popover{padding:16px 17px;border-radius:15px}
+ .tour-popover h2{font-size:18px}
+}
+@media(max-width:350px){
+ .tour-footer{flex-wrap:wrap}
+ .tour-navigation{margin-left:auto}
+}
+@media(prefers-reduced-motion:reduce){
+ .tour-spotlight-ring,.tour-progress>div{transition:none}
+}
