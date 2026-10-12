@@ -7,6 +7,7 @@ import {balanceFor,calculateZakat,portfolioValue,workspaceItems} from "@/lib/led
 import {formatMoney} from "@/lib/models";
 import type {ZakatConfig} from "@/lib/models";
 import {Card} from "./widgets";
+import {useFinoraUi} from "@/components/ui/finora-feedback";
 
 type NumericKey="goldPricePerGram"|"silverPricePerGram"|"goldGrams"|"silverGrams"|"otherCash"|"tradeInventory"|"collectibleReceivables"|"immediatelyDueLiabilities"|"reminderDays";
 function NumberField({label,value,onChange,help}:{label:string;value:number;onChange:(n:number)=>void;help?:string}){
@@ -14,6 +15,7 @@ function NumberField({label,value,onChange,help}:{label:string;value:number;onCh
 }
 export function Zakat(){
  const s=useFinance(),w=s.workspaces.find(x=>x.id===s.activeId)!,d=workspaceItems(s,w.id),config=w.zakat;
+ const {notify}=useFinoraUi();
  const balances=d.accounts.reduce((sum,a)=>sum+balanceFor(a,d.transactions),0),investments=portfolioValue(d.investments);
  const calc=calculateZakat(config,balances,investments),money=(n:number)=>formatMoney(n,w.currency);
  const [permission,setPermission]=useState("unknown");
@@ -33,7 +35,7 @@ export function Zakat(){
  <div className="field-row"><NumberField label={"Gold / gram · "+w.currency} value={config.goldPricePerGram} onChange={n=>patch("goldPricePerGram",n)}/><NumberField label={"Silver / gram · "+w.currency} value={config.silverPricePerGram} onChange={n=>patch("silverPricePerGram",n)}/></div>
  <label>When did your wealth first reach nisab?<input type="date" value={config.haulStart} onChange={e=>apply({haulStart:e.target.value})}/><small className="field-help">Enter this date yourself; Finora cannot determine it from current balances.</small></label>
  <NumberField label="Remind me this many days before the estimated due date" value={config.reminderDays} onChange={n=>patch("reminderDays",Math.floor(n))}/>
- <button className="btn btn-outline" onClick={async()=>{if(typeof Notification==="undefined")return alert("Browser notifications are not supported.");const p=await Notification.requestPermission();setPermission(p)}}><Bell size={17}/> {permission==="granted"?"Browser alerts enabled":"Enable browser alerts"}</button>
+ <button className="btn btn-outline" onClick={async()=>{if(typeof Notification==="undefined"){notify("This browser does not support notifications.","info");return}try{const p=await Notification.requestPermission();setPermission(p);notify(p==="granted"?"Zakat reminder notifications enabled.":p==="denied"?"Browser notifications are blocked. Update browser settings to enable them.":"Notification permission was not enabled.",p==="granted"?"success":"info")}catch{notify("Could not request notification permission.","error")}}}><Bell size={17}/> {permission==="granted"?"Browser alerts enabled":"Enable browser alerts"}</button>
  <div className="info-strip"><CalendarClock size={17}/><span>Estimated due date uses 354 days as a lunar-year approximation. Browser notifications work only while Finora is open; no background push service is configured.</span></div></div></Card>
  <Card title="Assets & immediate liabilities" subtitle="Review what is zakatable under the guidance you follow">
  <div className="zakat-auto"><div className="allocation"><span>Workspace cash & savings</span><b>{money(Math.max(0,balances))}</b></div><div className="allocation"><span>Recorded investments</span><b>{money(investments)}</b></div><label className="check-row"><input type="checkbox" checked={config.includeInvestments} onChange={e=>apply({includeInvestments:e.target.checked})}/> Include positions at entered market values</label></div>
