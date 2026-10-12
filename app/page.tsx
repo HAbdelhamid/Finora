@@ -1,6 +1,7 @@
 "use client";
 import { useEffect,useState } from "react";
 import { Wallet, Plus, Trash2, Download, LayoutDashboard, Receipt, CreditCard } from "lucide-react";
+import { totalByType, outstandingAmount } from "@/lib/finance-math";
 type Entry={id:string;type:"income"|"expense";amount:number;category:string;note:string;date:string};
 type Debt={id:string;name:string;amount:number;paid:number;direction:"owe"|"owed"};
 export default function Home(){
@@ -18,9 +19,9 @@ export default function Home(){
  useEffect(()=>{try{const raw=JSON.parse(localStorage.getItem("finora-v1")||"{}");setTransactions(Array.isArray(raw.transactions)?raw.transactions:[]);setDebts(Array.isArray(raw.debts)?raw.debts:[])}catch{}setReady(true)},[]);
  useEffect(()=>{if(ready)localStorage.setItem("finora-v1",JSON.stringify({transactions,debts}))},[transactions,debts,ready]);
  const cash=(n:number)=>new Intl.NumberFormat("en-MA",{style:"currency",currency:"MAD"}).format(n);
- const sum=(kind:Entry["type"],monthly=false)=>transactions.filter(t=>t.type===kind&&(!monthly||t.date.startsWith(new Date().toISOString().slice(0,7)))).reduce((s,t)=>s+t.amount,0);
+ const sum=(kind:Entry["type"],monthly=false)=>totalByType(transactions,kind,monthly?new Date().toISOString().slice(0,7):undefined);
  const income=sum("income",true),expenses=sum("expense",true),balance=sum("income")-sum("expense");
- const owed=debts.filter(d=>d.direction==="owe").reduce((s,d)=>s+Math.max(0,d.amount-d.paid),0);
+ const owed=outstandingAmount(debts,"owe");
  const add=(e:React.FormEvent)=>{e.preventDefault();if(Number(amount)<=0)return;setTransactions(v=>[{id:crypto.randomUUID(),type,amount:Number(amount),note:note||category,category,date:new Date().toISOString().slice(0,10)},...v]);setAmount("");setNote("");setTab("Transactions")};
  const backUp=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({transactions,debts},null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="finora-backup.json";a.click();URL.revokeObjectURL(url)};
  return <div className="shell"><aside className="sidebar"><div className="brand"><div className="brand-logo">F</div> finora<span className="brand-dot">.</span></div><div className="nav-label">WORKSPACE</div><nav>{[["Overview",LayoutDashboard],["Transactions",Receipt],["Debts",CreditCard],["Settings",Wallet]].map(([name,I])=><button key={name as string} className={tab===name?"nav active":"nav"} onClick={()=>setTab(name as string)}>{typeof I!=="string"&&<I size={19}/>} {name as string}</button>)}</nav></aside><main className="main"><header><div><div className="eyebrow">PERSONAL FINANCE</div><h1>{tab}</h1><p className="muted">Your money, in focus. Track expenses, income and debts.</p></div><button className="primary" onClick={()=>setTab("Transactions")}><Plus size={18}/> Add transaction</button></header>
