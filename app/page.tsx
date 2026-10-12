@@ -1,32 +1,57 @@
 "use client";
-import { useEffect,useState } from "react";
-import { Wallet, Plus, Trash2, Download, LayoutDashboard, Receipt, CreditCard } from "lucide-react";
-import { totalByType, outstandingAmount } from "@/lib/finance-math";
-type Entry={id:string;type:"income"|"expense";amount:number;category:string;note:string;date:string};
-type Debt={id:string;name:string;amount:number;paid:number;direction:"owe"|"owed"};
-export default function Home(){
- const [transactions,setTransactions]=useState<Entry[]>([]);
- const [debts,setDebts]=useState<Debt[]>([]);
- const [tab,setTab]=useState("Overview");
- const [ready,setReady]=useState(false);
- const [type,setType]=useState<"income"|"expense">("expense");
- const [amount,setAmount]=useState("");
- const [note,setNote]=useState("");
- const [category,setCategory]=useState("Food");
- const [debtName,setDebtName]=useState("");
- const [debtAmount,setDebtAmount]=useState("");
- const [direction,setDirection]=useState<"owe"|"owed">("owe");
- useEffect(()=>{try{const raw=JSON.parse(localStorage.getItem("finora-v1")||"{}");setTransactions(Array.isArray(raw.transactions)?raw.transactions:[]);setDebts(Array.isArray(raw.debts)?raw.debts:[])}catch{}setReady(true)},[]);
- useEffect(()=>{if(ready)localStorage.setItem("finora-v1",JSON.stringify({transactions,debts}))},[transactions,debts,ready]);
- const cash=(n:number)=>new Intl.NumberFormat("en-MA",{style:"currency",currency:"MAD"}).format(n);
- const sum=(kind:Entry["type"],monthly=false)=>totalByType(transactions,kind,monthly?new Date().toISOString().slice(0,7):undefined);
- const income=sum("income",true),expenses=sum("expense",true),balance=sum("income")-sum("expense");
- const owed=outstandingAmount(debts,"owe");
- const add=(e:React.FormEvent)=>{e.preventDefault();if(Number(amount)<=0)return;setTransactions(v=>[{id:crypto.randomUUID(),type,amount:Number(amount),note:note||category,category,date:new Date().toISOString().slice(0,10)},...v]);setAmount("");setNote("");setTab("Transactions")};
- const backUp=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({transactions,debts},null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="finora-backup.json";a.click();URL.revokeObjectURL(url)};
- return <div className="shell"><aside className="sidebar"><div className="brand"><div className="brand-logo">F</div> finora<span className="brand-dot">.</span></div><div className="nav-label">WORKSPACE</div><nav>{[["Overview",LayoutDashboard],["Transactions",Receipt],["Debts",CreditCard],["Settings",Wallet]].map(([name,I])=><button key={name as string} className={tab===name?"nav active":"nav"} onClick={()=>setTab(name as string)}>{typeof I!=="string"&&<I size={19}/>} {name as string}</button>)}</nav></aside><main className="main"><header><div><div className="eyebrow">PERSONAL FINANCE</div><h1>{tab}</h1><p className="muted">Your money, in focus. Track expenses, income and debts.</p></div><button className="primary" onClick={()=>setTab("Transactions")}><Plus size={18}/> Add transaction</button></header>
- {tab==="Overview"&&<><div className="stats"><div className="stat featured"><span>Current balance</span><h2>{cash(balance)}</h2><small>Tracked cash flow</small></div><div className="stat"><span>Income this month</span><h2>{cash(income)}</h2><small className="positive">Money in</small></div><div className="stat"><span>Expenses this month</span><h2>{cash(expenses)}</h2><small className="negative">Money out</small></div><div className="stat"><span>Outstanding debts</span><h2>{cash(owed)}</h2><small>Unpaid loans</small></div></div><section className="panel"><h3>Recent activity</h3>{transactions.length===0?<div className="empty">Add your first transaction to get started.</div>:transactions.slice(0,8).map(t=><div className="activity" key={t.id}><div className="activity-details"><b>{t.note}</b><small>{t.category} · {t.date}</small></div><strong className={t.type==="income"?"positive":""}>{t.type==="income"?"+":"−"}{cash(t.amount)}</strong></div>)}</section></>}
- {tab==="Transactions"&&<div className="split"><section className="panel"><h3>Record a transaction</h3><form onSubmit={add}><label>Type<select value={type} onChange={e=>setType(e.target.value as Entry["type"])}><option value="expense">Expense</option><option value="income">Income</option></select></label><label>Amount (MAD)<input type="number" min=".01" step=".01" required value={amount} onChange={e=>setAmount(e.target.value)}/></label><label>Category<select value={category} onChange={e=>setCategory(e.target.value)}>{["Food","Rent","Bills","Shopping","Transport","Salary","Freelance","Entertainment","Other"].map(c=><option key={c}>{c}</option>)}</select></label><label>Description<input value={note} onChange={e=>setNote(e.target.value)} placeholder="What was this for?"/></label><button className="primary submit">Save transaction</button></form></section><section className="panel"><h3>Transaction history</h3>{transactions.length===0?<div className="empty">No transactions yet</div>:transactions.map(t=><div className="activity" key={t.id}><div className="activity-details"><b>{t.note}</b><small>{t.category} · {t.date}</small></div><strong className={t.type==="income"?"positive":""}>{cash(t.amount)}</strong><button className="delete" aria-label="Delete" onClick={()=>setTransactions(v=>v.filter(x=>x.id!==t.id))}><Trash2 size={17}/></button></div>)}</section></div>}
- {tab==="Debts"&&<div className="split"><section className="panel"><h3>Record a debt</h3><form onSubmit={e=>{e.preventDefault();if(+debtAmount<=0||!debtName)return;setDebts(v=>[{id:crypto.randomUUID(),name:debtName,amount:+debtAmount,paid:0,direction},...v]);setDebtName("");setDebtAmount("")}}><label>Name<input required value={debtName} onChange={e=>setDebtName(e.target.value)}/></label><label>Direction<select value={direction} onChange={e=>setDirection(e.target.value as Debt["direction"])}><option value="owe">I owe someone</option><option value="owed">Someone owes me</option></select></label><label>Amount (MAD)<input type="number" min=".01" step=".01" required value={debtAmount} onChange={e=>setDebtAmount(e.target.value)}/></label><button className="primary submit">Add debt</button></form></section><section className="panel"><h3>Outstanding debts</h3>{debts.length===0?<div className="empty">No debts to show</div>:debts.map(d=><div className="debt" key={d.id}><div className="between"><b>{d.name}</b><button className="delete" onClick={()=>setDebts(v=>v.filter(x=>x.id!==d.id))}><Trash2 size={17}/></button></div><small>{d.direction==="owe"?"You owe":"Owed to you"}</small><h3>{cash(Math.max(0,d.amount-d.paid))}</h3><div className="progress"><div style={{width:Math.min(100,d.paid/d.amount*100)+"%"}}/></div><button className="text-btn" onClick={()=>{const str=prompt("Repayment amount (MAD)");if(str===null)return;const n=Number(str);if(n<=0||!Number.isFinite(n)||n>d.amount-d.paid)return alert("Invalid amount");setDebts(v=>v.map(x=>x.id===d.id?{...x,paid:x.paid+n}:x))}}>Record repayment</button></div>)}</section></div>}
- {tab==="Settings"&&<section className="panel settings"><h3>Data and privacy</h3><p className="muted">This local demo stores data in your browser, without cloud sync.</p><button className="primary" onClick={backUp}><Download size={18}/> Download backup</button><label>Restore backup<input type="file" accept=".json" onChange={async e=>{const f=e.target.files?.[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!Array.isArray(x.transactions)||!Array.isArray(x.debts))throw Error();if(confirm("Replace your current data?")){setTransactions(x.transactions);setDebts(x.debts)}}catch{alert("Invalid backup")}}}/></label><button className="danger" onClick={()=>{if(confirm("Delete all your local records?")){setTransactions([]);setDebts([])}}}>Delete all records</button></section>}<footer>Finora · Personal finance manager · Local demo</footer></main></div>;
+import {useEffect,useState} from "react";
+import {Activity,ArrowRight,BookOpen,BriefcaseBusiness,Building2,CalendarDays,ChartNoAxesCombined,ChevronDown,Command,FileChartColumn,Landmark,LayoutDashboard,Menu,Moon,Plus,Settings2,ShieldCheck,Sun,Target,UserRound,WalletCards,X} from "lucide-react";
+import {useFinance} from "@/lib/finance-store";
+import {Overview} from "@/components/overview";
+import {Transactions} from "@/components/transactions";
+import {Planning} from "@/components/planning";
+import {Accounts} from "@/components/accounts";
+import {Investments} from "@/components/investments";
+import {Reports} from "@/components/reports";
+import {Zakat} from "@/components/zakat";
+import {Workspaces} from "@/components/workspaces";
+import {formatMoney} from "@/lib/models";
+
+const links=[
+ {name:"Overview",icon:LayoutDashboard,group:"WORKSPACE"},
+ {name:"Transactions",icon:Activity,group:"WORKSPACE"},
+ {name:"Planning",icon:Target,group:"WORKSPACE"},
+ {name:"Accounts",icon:WalletCards,group:"WORKSPACE"},
+ {name:"Investments",icon:ChartNoAxesCombined,group:"INSIGHTS"},
+ {name:"Reports",icon:FileChartColumn,group:"INSIGHTS"},
+ {name:"Zakat",icon:BookOpen,group:"INSIGHTS"},
+ {name:"Workspaces",icon:Settings2,group:"MANAGE"}
+];
+const label=(name:string)=>name==="Reports"?"Reports & Bilan":name==="Zakat"?"Zakat Planner":name;
+export default function FinanceApp(){
+ const [mounted,setMounted]=useState(false),[nav,setNav]=useState("Overview"),[drawer,setDrawer]=useState(false);
+ const [dark,setDark]=useState(false);
+ const s=useFinance();
+ useEffect(()=>setMounted(true),[]);
+ useEffect(()=>{if(mounted){document.documentElement.dataset.theme=dark?"dark":"light"}},[mounted,dark]);
+ if(!mounted)return <div className="boot-screen"><span className="boot-logo">f<span>.</span></span><p>Preparing your financial command center…</p></div>;
+ const w=s.workspaces.find(x=>x.id===s.activeId)||s.workspaces[0];
+ const navigate=(screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"smooth"})};
+ const navIcon=(kind:string)=>kind==="personal"?<UserRound size={16}/>:kind==="freelance"?<BriefcaseBusiness size={16}/>:<Building2 size={16}/>;
+ return <div className="app-shell">
+ <aside className={"side-panel "+(drawer?"side-open":"")}>
+  <div className="wordmark"><div className="wordmark-symbol"><span>f</span><i/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
+  <div className="workspace-caption">ACTIVE WORKSPACE</div>
+  <div className="workspace-switch"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
+   <select aria-label="Switch workspace" title="Switch workspace" value={w.id} onChange={e=>s.select(e.target.value)}>{s.workspaces.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
+  <div className="side-scroll">{["WORKSPACE","INSIGHTS","MANAGE"].map(group=><div className="nav-group" key={group}><div className="nav-group-title">{group}</div>{links.filter(x=>x.group===group).map(x=><button className={"side-link "+(nav===x.name?"active":"")} key={x.name} onClick={()=>navigate(x.name)}><x.icon size={18} strokeWidth={1.9}/><span>{label(x.name)}</span>{nav===x.name&&<span className="active-indicator"/>}</button>)}</div>)}</div>
+  <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Your data is stored locally in this version. Export a backup regularly.</p></div><div className="profile"><div className="profile-avatar">F</div><div><b>Finora workspace</b><small>Local-first preview</small></div></div></div>
+ </aside>
+ {drawer&&<button className="drawer-shade" aria-label="Close menu" onClick={()=>setDrawer(false)}/>}
+ <div className="body-wrap"><header className="top-bar"><div className="top-breadcrumb"><button className="mobile-menu" aria-label="Open menu" onClick={()=>setDrawer(true)}><Menu size={22}/></button><span>My workspace</span><ArrowRight size={14}/><strong>{label(nav)}</strong></div><div className="top-actions"><span className="top-date"><CalendarDays size={16}/>{new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</span><span className="local-badge"><span/> {w.demo?"Demo mode":"Local mode"}</span><button className="icon-outline" aria-label="Toggle theme" onClick={()=>setDark(v=>!v)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button><div className="top-avatar">F</div></div></header>
+ <main className="content-area"><div className="content-top"><div><span className="overline">FINORA / YOUR FINANCIAL COMMAND CENTER</span><h1>{label(nav)}</h1></div><div className="top-utility"><span className="mini-badge">{w.currency}</span><span className="mini-badge">{w.kind==="personal"?"Personal":w.kind==="company"?"Business":"Independent"}</span></div></div>
+ {nav==="Overview"&&<Overview navigate={navigate} openNew={()=>navigate("Transactions")}/>}
+ {nav==="Transactions"&&<Transactions/>}
+ {nav==="Planning"&&<Planning/>}
+ {nav==="Accounts"&&<Accounts/>}
+ {nav==="Investments"&&<Investments/>}
+ {nav==="Reports"&&<Reports/>}
+ {nav==="Zakat"&&<Zakat/>}
+ {nav==="Workspaces"&&<Workspaces/>}
+ </main><footer className="main-footer"><span>© 2026 Finora · Make every decision count.</span><span>Local preview · Not financial, tax or religious advice</span></footer></div></div>;
 }
