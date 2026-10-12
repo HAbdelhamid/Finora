@@ -1,6 +1,8 @@
 "use client";
 import {Cloud,CloudOff,HardDrive,RefreshCw,ShieldCheck,CloudDownload,CloudUpload,AlertTriangle,LogOut,CheckCircle2,ExternalLink} from "lucide-react";
 import {useStorage} from "./storage-provider";
+import {AccountAvatar} from "@/components/account-avatar";
+import {accountDisplayName} from "@/lib/account-profile";
 import {Card} from "./widgets";
 import type {StorageMode} from "@/lib/cloud-storage";
 const modes:{id:StorageMode;name:string;description:string;icon:"local"|"cloud"|"hybrid"}[]=[
@@ -17,7 +19,7 @@ export function StorageSettings(){
  <div className="info-strip"><ShieldCheck size={18}/><span>Browser storage isn't a file on your C: drive and may be cleared by the browser. Download JSON backups regularly. Cloud-only requires a working connection for durable saves; hybrid is better if you need to work offline.</span></div>
  </Card>
  <div className="form-layout"><Card title="Your account" subtitle="Google or email sign-in through Supabase Auth">
- {sync.user?<div className="account-identity"><div className="identity-icon">{sync.user.email?.slice(0,1).toUpperCase()||"G"}</div><div className="flex-fill"><strong>{sync.user.user_metadata?.full_name||"Signed in"}</strong><small>{sync.user.email||"Google account"}</small></div><span className="mini-badge">Connected</span></div>:<div className="account-identity"><div className="identity-icon"><CloudOff size={20}/></div><div><strong>Not signed in</strong><small>Local tracking works without an account</small></div></div>}
+ {sync.user?<div className="account-identity"><AccountAvatar user={sync.user} size={40}/><div className="flex-fill"><strong>{accountDisplayName(sync.user)}</strong><small>{sync.user.email||"Google account"}</small></div><span className="mini-badge">Connected</span></div>:<div className="account-identity"><div className="identity-icon"><CloudOff size={20}/></div><div><strong>Not signed in</strong><small>Local tracking works without an account</small></div></div>}
  {sync.configured?<div className="storage-actions">{sync.user?<button className="btn btn-outline" onClick={()=>void sync.signOut()}><LogOut size={17}/> Sign out</button>:<><button className="btn btn-primary" onClick={()=>void sync.signIn()}>Continue with Google</button><a className="btn btn-outline" href="/login">Sign in with email</a></>}</div>:<div className="notice-warning"><AlertTriangle size={18}/> Cloud sign-in is not configured yet. Set your Supabase environment variables and Google provider credentials before enabling remote storage.</div>}
  <p className="field-help">Finora uses Google OAuth, similar to Rolevia's sign-in flow, but financial data authorization is enforced using Supabase Auth and per-user PostgreSQL Row Level Security.</p></Card>
  <Card title="Sync health" subtitle="Status and conflict-safe cloud revision tracking">

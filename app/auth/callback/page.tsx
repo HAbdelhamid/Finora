@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import Link from "next/link";
+import {BrandMark} from "@/components/brand-mark";
 import {getSupabase} from "@/lib/supabase";
 export default function AuthCallback(){
  const [error,setError]=useState("");
@@ -22,5 +23,5 @@ export default function AuthCallback(){
   }
   void finish();return()=>{alive=false};
  },[]);
- return <main className="auth-callback"><div className="cloud-lock-card"><div className="lock-mark">f.</div><h1>{error?"Sign-in needs attention":"Finishing your sign-in"}</h1><p>{error||"Verifying your session securely…"}</p><Link href="/login">Return to sign in</Link></div></main>;
+ return <main className="auth-callback"><div className="cloud-lock-card"><div className="lock-mark"><BrandMark size={46}/></div><h1>{error?"Sign-in needs attention":"Finishing your sign-in"}</h1><p>{error||"Verifying your session securely…"}</p><Link href="/login">Return to sign in</Link></div></main>;
 }
