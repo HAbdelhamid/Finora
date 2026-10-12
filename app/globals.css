@@ -138,6 +138,7 @@ html[data-theme=dark] .notice-warning{background:#4b3a24;border-color:#8b6734;co
    Keep desktop breadcrumbs, use the Finora wordmark on phones instead. */
 .mobile-brand{display:none}
 .status-short{display:none}
+.local-badge .status-long,.local-badge .status-short{width:auto;height:auto;background:transparent;border-radius:0;min-width:0;white-space:nowrap}
 .local-badge .status-dot{display:inline-block;flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:#18b996}
 .top-avatar{flex-shrink:0;border:0;cursor:pointer;font:inherit;font-weight:900}
 .top-avatar:focus-visible{outline:3px solid #45c7a5;outline-offset:3px}
