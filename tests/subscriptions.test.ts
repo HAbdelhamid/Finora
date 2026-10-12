@@ -56,6 +56,17 @@ describe("backward compatible subscriptions",()=>{
   expect(useFinance.getState().recordSubscriptionPayment(id,"2026-10-12")).toBe(false);
   expect(useFinance.getState().transactions).toHaveLength(before+1);
  });
+ it("converts foreign-currency commitments and booked charges at a user-entered rate",()=>{
+  const state=useFinance.getState(),account=state.accounts[0],before=state.transactions.length;
+  state.addSubscription({workspaceId:account.workspaceId,accountId:account.id,name:"Coding plan",
+   provider:"Anthropic",plan:"Pro",category:"ai_tools",amount:20,currency:"USD",conversionRate:10,
+   cycle:"monthly",nextRenewal:"2026-10-01",status:"active",autoRenew:true,website:"",notes:""});
+  const subscription=useFinance.getState().subscriptions[0];
+  expect(subscriptionMetrics([subscription]).monthlyCost).toBe(200);
+  expect(useFinance.getState().recordSubscriptionPayment(subscription.id,"2026-10-12")).toBe(true);
+  expect(useFinance.getState().transactions).toHaveLength(before+1);
+  expect(useFinance.getState().transactions[0].amount).toBe(200);
+ });
  it("excludes paused and cancelled plans from subscription commitments",()=>{
   const seed=makeSeed();
   const sub=(status:"active"|"paused")=>({
