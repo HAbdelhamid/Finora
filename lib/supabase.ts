@@ -7,7 +7,7 @@ let cached: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient | null {
   if (!cloudConfigured) return null;
   if (!cached) cached = createClient(url!, key!, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType:"pkce" },
   });
   return cached;
 }
