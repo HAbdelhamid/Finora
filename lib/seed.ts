@@ -38,6 +38,7 @@ export function makeSeed(anchor=new Date()):FinoraData{
  investments:[{id:"invest-index",workspaceId:personal.id,name:"Global Index Fund",symbol:"ETF",units:12,costPerUnit:900,pricePerUnit:1030,assetClass:"funds"},
  {id:"invest-stock",workspaceId:personal.id,name:"Equity portfolio",symbol:"EQT",units:5,costPerUnit:800,pricePerUnit:845,assetClass:"stocks"}],
  debts:[{id:"debt-phone",workspaceId:personal.id,name:"Device instalments",direction:"owe",principal:4000,paid:2400}],
+ subscriptions:[],
  recurring:[{id:"recur-salary",workspaceId:personal.id,accountId:"checking-personal",name:"Monthly salary",type:"income",amount:10500,category:"Salary",day:2,enabled:true},
  {id:"recur-rent",workspaceId:personal.id,accountId:"checking-personal",name:"Monthly rent",type:"expense",amount:2900,category:"Housing",day:4,enabled:true}]
  };

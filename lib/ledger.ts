@@ -21,7 +21,8 @@ export const workspaceItems = (data:FinoraData,id:string) => ({
  goals:data.goals.filter(x=>x.workspaceId===id),
  investments:data.investments.filter(x=>x.workspaceId===id),
  debts:data.debts.filter(x=>x.workspaceId===id),
- recurring:data.recurring.filter(x=>x.workspaceId===id)
+ recurring:data.recurring.filter(x=>x.workspaceId===id),
+ subscriptions:data.subscriptions.filter(x=>x.workspaceId===id)
 });
 
 export const totalFlow = (transactions:Transaction[],type:FlowType,month?:string) => roundMoney(transactions.reduce((sum,t)=>
