@@ -2,7 +2,7 @@
 import {useEffect,useState,type FormEvent} from "react";
 import Link from "next/link";
 import {ArrowLeft,ArrowRight,CheckCircle2,Eye,EyeOff,LockKeyhole,Mail,ShieldCheck,Sparkles} from "lucide-react";
-import {getSupabase} from "@/lib/supabase";
+import {cloudConfigured,getSupabase} from "@/lib/supabase";
 import {googleSignIn} from "@/lib/cloud-storage";
 
 type Mode="login"|"signup"|"forgot";
@@ -16,15 +16,15 @@ export function AuthScreen({initialMode}:{initialMode:"login"|"signup"}){
  const [loading,setLoading]=useState(false);
  const [error,setError]=useState("");
  const [message,setMessage]=useState("");
- const client=getSupabase();
  useEffect(()=>{
+  const client=getSupabase();
   let alive=true;
   client?.auth.getUser().then(({data})=>{if(alive&&data.user)window.location.replace("/app")}).catch(()=>{});
   return()=>{alive=false};
- },[client]);
+ },[]);
  const toggle=(next:Mode)=>{setMode(next);setError("");setMessage("");setPassword("");setConfirmPassword("")};
  const authenticate=async(e:FormEvent<HTMLFormElement>)=>{
-  e.preventDefault();if(!client){setError("Sign-in isn't configured. You can still explore Finora locally.");return}
+  e.preventDefault();const client=getSupabase();if(!client){setError("Sign-in isn't configured. You can still explore Finora locally.");return}
   if(loading)return;
   setError("");setMessage("");setLoading(true);
   try{
@@ -71,8 +71,8 @@ export function AuthScreen({initialMode}:{initialMode:"login"|"signup"}){
     {mode==="login"&&<button className="auth-forgot" type="button" onClick={()=>toggle("forgot")}>Forgot password?</button>}
     {error&&<div role="alert" className="auth-alert auth-error">{error}</div>}
     {message&&<div role="status" className="auth-alert auth-success"><CheckCircle2 size={18}/>{message}</div>}
-    <button type="submit" className="auth-submit" disabled={loading||!client}>{loading?"Please wait…":mode==="signup"?"Create my account":mode==="forgot"?"Send reset link":"Sign in to Finora"} <ArrowRight size={18}/></button>
-    {!client&&<p className="auth-alert auth-error">Cloud authentication isn't configured. Try the local demo instead.</p>}
+    <button type="submit" className="auth-submit" disabled={loading||!cloudConfigured}>{loading?"Please wait…":mode==="signup"?"Create my account":mode==="forgot"?"Send reset link":"Sign in to Finora"} <ArrowRight size={18}/></button>
+    {!cloudConfigured&&<p className="auth-alert auth-error">Cloud authentication isn't configured. Try the local demo instead.</p>}
    </form>
    <div className="auth-switch">{mode==="signup"?<>Already have an account? <button type="button" onClick={()=>toggle("login")}>Sign in</button></>:mode==="forgot"?<button type="button" onClick={()=>toggle("login")}>← Return to sign in</button>:<>New to Finora? <button type="button" onClick={()=>toggle("signup")}>Create an account</button></>}</div>
    <div className="auth-local"><span>Prefer staying offline?</span><Link href="/app?mode=local">Use Finora without an account <ArrowRight size={15}/></Link></div>
