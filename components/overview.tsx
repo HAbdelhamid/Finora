@@ -20,7 +20,7 @@ export function Overview({navigate,openNew}:{navigate:(tab:string)=>void;openNew
  return <div className="page-stack">
  {ws.demo&&<div className="demo-banner"><div className="demo-dot"/><strong>Sample data</strong><span>This workspace contains example transactions, not your real money.</span><button onClick={()=>navigate("Workspaces")}>Create workspace <ArrowRight size={15}/></button></div>}
  <div className="welcome-row"><div><p className="overline">YOUR FINANCIAL PULSE</p><h2 className="welcome-title">A clearer picture of your money <span className="sparkle">✳</span></h2><p className="sub-copy">Everything in one place, with insights that make sense.</p></div><button className="btn btn-primary" onClick={openNew}><Plus size={17}/> New transaction</button></div>
- <div className="metric-grid">
+ <div className="metric-grid" data-tour="overview">
  <Metric feature label="Net worth estimate" value={formatMoney(netWorth,ws.currency)} icon={<CircleDollarSign size={20}/>} detail="Cash + holdings − debts"/>
  <Metric label="Income this month" value={formatMoney(income,ws.currency)} icon={<ArrowDownLeft size={19}/>} detail="Recorded revenue"/>
  <Metric label="Expenses this month" value={formatMoney(expense,ws.currency)} icon={<ArrowUpRight size={19}/>} detail="This month's spending"/>

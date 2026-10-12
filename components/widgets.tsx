@@ -6,8 +6,8 @@ import { formatMoney } from "@/lib/models";
 
 const Chart=dynamic(()=>import("echarts-for-react"),{ssr:false,loading:()=> <div className="chart-skeleton"/>});
 const green="#15ad91",purple="#7376e7",orange="#edaa5e",text="#8c9aa9";
-export function Card({title,subtitle,children,action,className=""}:{title:string;subtitle?:string;children:ReactNode;action?:ReactNode;className?:string}){
- return <section className={"surface "+className}><div className="surface-head"><div><h3>{title}</h3>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>{children}</section>;
+export function Card({title,subtitle,children,action,className="",tourId}:{title:string;subtitle?:string;children:ReactNode;action?:ReactNode;className?:string;tourId?:string}){
+ return <section className={"surface "+className}><div className="surface-head" data-tour={tourId}><div><h3>{title}</h3>{subtitle&&<p>{subtitle}</p>}</div>{action}</div>{children}</section>;
 }
 export function Metric({label,value,detail,icon,feature=false}:{label:string;value:string;detail:string;icon:ReactNode;feature?:boolean}){
  return <div className={"metric "+(feature?"metric-feature":"")}><div className="metric-top"><span>{label}</span><div className="metric-icon">{icon}</div></div><strong>{value}</strong><div className="metric-meta">{detail}</div></div>;

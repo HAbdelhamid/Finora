@@ -12,7 +12,7 @@ export function StorageSettings(){
  const sync=useStorage();
  const Icon=({type}:{type:string})=>type==="local"?<HardDrive size={22}/>:type==="hybrid"?<RefreshCw size={22}/>:<Cloud size={22}/>;
  return <div className="page-stack"><div className="section-intro"><h2>Storage & identity</h2><p>Choose where your information lives. You stay in control, with no surprise uploads.</p></div>
- <Card title="Where should we save your finances?" subtitle="Your selection applies to all Finora workspaces on this browser.">
+ <Card tourId="storage" title="Where should we save your finances?" subtitle="Your selection applies to all Finora workspaces on this browser.">
  <div className="storage-modes">{modes.map(m=><button className={"storage-mode "+(sync.mode===m.id?"selected":"")} key={m.id} onClick={()=>void sync.chooseMode(m.id)}><div className="storage-mode-icon"><Icon type={m.icon}/></div><div><strong>{m.name}</strong><p>{m.description}</p></div><span className="storage-choice">{sync.mode===m.id?<CheckCircle2 size={18}/>:<span/>}</span></button>)}</div>
  <div className="info-strip"><ShieldCheck size={18}/><span>Browser storage isn't a file on your C: drive and may be cleared by the browser. Download JSON backups regularly. Cloud-only requires a working connection for durable saves; hybrid is better if you need to work offline.</span></div>
  </Card>
