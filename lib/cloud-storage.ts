@@ -40,9 +40,40 @@ export async function commitCloudSnapshot(expectedRevision:number,snapshot:Finor
  return {revision:nextRevision,conflict:false};
 }
 
+/** The public GoTrue settings endpoint reports which external providers are enabled. */
+export function googleProviderEnabled(settings:unknown):boolean|null {
+ if(!settings||typeof settings!=="object")return null;
+ const external=(settings as {external?:unknown}).external;
+ if(!external||typeof external!=="object")return null;
+ const enabled=(external as {google?:unknown}).google;
+ return typeof enabled==="boolean"?enabled:null;
+}
+
 export async function googleSignIn():Promise<void>{
  const client=getSupabase();
  if(!client)throw Error("Supabase is not configured.");
+ // Preflight avoids redirecting visitors to Supabase's raw JSON validation error
+ // when the Google provider has been configured in Google Cloud but not enabled
+ // in Supabase Authentication -> Providers -> Google.
+ const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+ const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+ if(url&&key){
+  try {
+   const res=await fetch(url.replace(/\\/$/,"")+"/auth/v1/settings",{
+    headers:{apikey:key},cache:"no-store"
+   });
+   if(res.ok){
+    const settings:unknown=await res.json();
+    if(googleProviderEnabled(settings)===false){
+     throw Error("Google sign-in is temporarily unavailable. The administrator needs to enable Google under Supabase Authentication → Providers and save the settings.");
+    }
+   }
+  } catch(error) {
+   // Configuration errors should be displayed in the current page. Network
+   // failures should fall through to Supabase's regular OAuth error handling.
+   if(error instanceof Error&&error.message.startsWith("Google sign-in is temporarily unavailable"))throw error;
+  }
+ }
  const {error}=await client.auth.signInWithOAuth({
   provider:"google",
   options:{redirectTo:window.location.origin+"/auth/callback",queryParams:{prompt:"select_account"}}
