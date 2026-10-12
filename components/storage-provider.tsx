@@ -164,7 +164,22 @@ export function StorageProvider({children}:{children:ReactNode}){
  const blocked=mode==="cloud"&&(!user||!ready);
  return <CloudContext.Provider value={{mode,ready,configured:cloudConfigured,user,status,error,conflict,chooseMode,syncNow,resolveConflict,signIn,signOut}}>
   {children}
-  {blocked&&<div className="cloud-lock" role="status"><div className="cloud-lock-card"><div className="lock-mark">f.</div><h2>{!user?"Your cloud workspace is locked":"Opening your cloud vault"}</h2><p>{!user?"Sign in with Google to access your saved workspaces and transactions. Your data is private to your account.":status==="loading"?"Fetching your encrypted-transport cloud snapshot…":error||"Choose a version to continue."}</p>{!user&&<button className="btn btn-primary" onClick={()=>void signIn()}>Sign in with Google</button>}<button className="btn btn-outline" onClick={()=>void chooseMode("local")}>Use this browser instead</button>{error&&<p className="warning-text">{error}</p>}</div></div>}
+  {conflict&&<div className="cloud-lock" role="dialog" aria-modal="true" aria-label="Cloud sync conflict">
+   <div className="cloud-lock-card"><div className="lock-mark">!</div><h2>Two different finance versions</h2>
+    <p>Your browser and Google account contain different records. Nothing has been overwritten. Export a copy before choosing which complete snapshot to keep.</p>
+    <button className="btn btn-outline" onClick={()=>{
+     const url=URL.createObjectURL(new Blob([JSON.stringify(getFinoraSnapshot(),null,2)],{type:"application/json"}));
+     const a=document.createElement("a");a.href=url;a.download="finora-local-before-conflict.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }}>Download this browser's backup</button>
+    <button className="btn btn-outline" onClick={()=>{
+     const url=URL.createObjectURL(new Blob([JSON.stringify(conflict.remote.snapshot,null,2)],{type:"application/json"}));
+     const a=document.createElement("a");a.href=url;a.download="finora-cloud-before-conflict.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }}>Download cloud backup</button>
+    <button className="btn btn-primary" onClick={()=>void resolveConflict("remote")}>Load cloud version on this device</button>
+    <button className="btn btn-outline" onClick={()=>void resolveConflict("local")}>Replace cloud with this device's version</button>
+    {error&&<p className="warning-text">{error}</p>}
+   </div></div>}
+  {!conflict&&blocked&&<div className="cloud-lock" role="status"><div className="cloud-lock-card"><div className="lock-mark">f.</div><h2>{!user?"Your cloud workspace is locked":"Opening your cloud vault"}</h2><p>{!user?"Sign in with Google to access your saved workspaces and transactions. Your data is private to your account.":status==="loading"?"Fetching your encrypted-transport cloud snapshot…":error||"Choose a version to continue."}</p>{!user&&<button className="btn btn-primary" onClick={()=>void signIn()}>Sign in with Google</button>}<button className="btn btn-outline" onClick={()=>void chooseMode("local")}>Use this browser instead</button>{error&&<p className="warning-text">{error}</p>}</div></div>}
  </CloudContext.Provider>;
 }
 export function useStorage(){const value=useContext(CloudContext);if(!value)throw Error("StorageProvider is missing");return value}
