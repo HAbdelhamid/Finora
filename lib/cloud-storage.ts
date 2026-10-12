@@ -35,8 +35,9 @@ export async function commitCloudSnapshot(expectedRevision:number,snapshot:Finor
  if(error)throw Error("Cloud save failed: "+error.message);
  const reply=data as {ok?:boolean;conflict?:boolean;revision?:number}|null;
  if(reply?.conflict)return {revision:Number(reply.revision||0),conflict:true};
- if(!reply?.ok||!Number.isInteger(reply.revision))throw Error("Cloud save did not return a valid revision.");
- return {revision:reply.revision,conflict:false};
+ const nextRevision=reply?.revision;
+ if(!reply?.ok||typeof nextRevision!=="number"||!Number.isInteger(nextRevision))throw Error("Cloud save did not return a valid revision.");
+ return {revision:nextRevision,conflict:false};
 }
 
 export async function googleSignIn():Promise<void>{
