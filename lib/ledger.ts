@@ -84,7 +84,8 @@ export function monthReport(data:FinoraData,workspaceId:string,month:string){
  const transactions=items.transactions.filter(t=>t.date.startsWith(month));
  const income=totalFlow(transactions,"income"),expense=totalFlow(transactions,"expense");
  const expensesByCategory=categorySpend(transactions);
- const balances=items.accounts.map(a=>({name:a.name,balance:balanceFor(a,items.transactions)}));
- const estimate=taxEstimate(ws,transactions,month.slice(0,4));
+ const historyThroughMonth=items.transactions.filter(t=>t.date.slice(0,7)<=month);
+ const balances=items.accounts.map(a=>({name:a.name,balance:balanceFor(a,historyThroughMonth)}));
+ const estimate=taxEstimate(ws,items.transactions,month.slice(0,4));
  return {workspace:ws,month,transactions,income,expense,net:roundMoney(income-expense),expensesByCategory,balances,taxEstimate:estimate};
 }
