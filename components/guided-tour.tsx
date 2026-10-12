@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useRef,useState} from "react";
-import {ArrowLeft,ArrowRight,Check,ChevronRight,Compass,HelpCircle,X} from "lucide-react";
+import {ArrowLeft,ArrowRight,Check,Compass,HelpCircle,X} from "lucide-react";
 import {TOUR_STEPS,clampStep,tourPreferenceKey} from "@/lib/tour";
 
 type Rectangle={top:number;bottom:number;left:number;right:number;width:number;height:number};
@@ -51,6 +51,7 @@ export function GuidedTour({onNavigate,onDrawerChange,currentNav,drawerOpen,user
  const modalRef=useRef<HTMLDivElement>(null);
  const launcherRef=useRef<HTMLButtonElement>(null);
  const savedFocusRef=useRef<HTMLElement|null>(null);
+ const originalSectionRef=useRef("Overview");
  const key=tourPreferenceKey(userId);
  const step=TOUR_STEPS[index];
 
@@ -63,9 +64,13 @@ export function GuidedTour({onNavigate,onDrawerChange,currentNav,drawerOpen,user
  },[key]);
  const close=useCallback((done=false)=>{
   setActive(false);setRectangle(null);setInvite(false);
-  onDrawerChange(false);remember(done?"completed":"seen");
-  window.requestAnimationFrame(()=>launcherRef.current?.focus());
- },[onDrawerChange,remember]);
+  onDrawerChange(false);onNavigate(done?"Overview":originalSectionRef.current);remember(done?"completed":"seen");
+  window.requestAnimationFrame(()=>{
+   const original=savedFocusRef.current;
+   if(original?.isConnected)original.focus();
+   else launcherRef.current?.focus();
+  });
+ },[onDrawerChange,onNavigate,remember]);
 
  const moveTo=useCallback((stepNumber:number)=>{
   const next=clampStep(stepNumber),chosen=TOUR_STEPS[next];
@@ -76,6 +81,7 @@ export function GuidedTour({onNavigate,onDrawerChange,currentNav,drawerOpen,user
 
  const start=()=>{
   savedFocusRef.current=document.activeElement instanceof HTMLElement?document.activeElement:null;
+  originalSectionRef.current=currentNav;
   setInvite(false);setActive(true);moveTo(0);
  };
 
@@ -102,7 +108,8 @@ export function GuidedTour({onNavigate,onDrawerChange,currentNav,drawerOpen,user
     }
    }
    measure();
-   delayed=window.setTimeout(measure,170);
+   // Allow the mobile drawer slide-in (250ms) to finish before the final measure.
+   delayed=window.setTimeout(measure,340);
   };
   raf=window.requestAnimationFrame(begin);
   window.addEventListener("resize",measure);
