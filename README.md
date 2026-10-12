@@ -17,6 +17,14 @@ Forms use browser constraint validation with branded error notifications and err
 
 These controls do not alter financial calculations or storage behavior. Back up your records before any destructive data operation.
 
+## Subscription manager and premium reports
+
+Open **Subscriptions** from the workspace sidebar to manage individual services (mobile plans, internet, AI coding tools, SaaS, streaming, cloud services and more). Each record captures a service name, exact provider and plan, category, amount in the workspace currency, billing cycle, next renewal date, payment account, current status, whether it auto-renews, provider website and notes. Users can edit/remove plans or manually **Record payment** when due. Upcoming payments are **forecasts only**: adding a subscription does not create an expense or charge a bank. The monthly and annual commitment numbers are estimates and exclude paused/cancelled subscriptions. No real provider billing API or automatic charging is configured.
+
+Subscription information is included in Finora's local/cloud/hybrid financial snapshot and JSON backups. Existing backups that don't have subscriptions remain compatible and load with an empty subscription collection; nothing is deleted or reset during this update. A manual payment adds a normal transaction and advances the renewal date.
+
+**Reports → Export PDF** now generates a branded, multi-page statement with an executive summary, category and balance tables, a transaction register, subscription commitments, contrasting row stripes, clear total alignment and page numbers. Subscription commitments appear separately as **planned, unbooked spending** to avoid misleading expense totals. PDF values are user-entered and not audited.
+
 ## User journeys
 
 - **/** — public marketing homepage with product features, workspace examples, privacy details and clear calls to action.
