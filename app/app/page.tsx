@@ -78,7 +78,7 @@ function FinanceApp(){
     <span className="status-dot" aria-hidden="true"/><span className="status-long">{sync.mode==="local"?(w.demo?"Demo · Local":"Local device"):sync.mode==="cloud"?"Cloud storage":"Hybrid sync"}</span><span className="status-short" aria-hidden="true">{sync.mode==="local"?(w.demo?"Demo":"Local"):sync.mode==="cloud"?"Cloud":"Hybrid"}</span>
    </span>
    <button className="icon-outline" type="button" aria-label={dark?"Use light theme":"Use dark theme"} onClick={()=>setDark(v=>!v)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
-   <AccountControls user={sync.user} onSettings={()=>navigate("Storage")} onSignOut={()=>void sync.signOut()} error={sync.error}/>
+   <AccountControls user={sync.user} storageMode={sync.mode} onSettings={()=>navigate("Storage")} onSignOut={()=>void sync.signOut()} error={sync.error}/>
   </div>
  </header>
  <main className="content-area"><div className="content-top"><div><span className="overline">FINORA / YOUR FINANCIAL COMMAND CENTER</span><h1>{label(nav)}</h1></div><div className="top-utility"><span className="mini-badge">{w.currency}</span><span className="mini-badge">{w.kind==="personal"?"Personal":w.kind==="company"?"Business":"Independent"}</span></div></div>

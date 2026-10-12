@@ -5,8 +5,8 @@ import {LogOut,Settings2,ChevronDown} from "lucide-react";
 import {AccountAvatar} from "@/components/account-avatar";
 import {accountDisplayName} from "@/lib/account-profile";
 
-export function AccountControls({user,onSettings,onSignOut,error}:{
- user:User|null;onSettings:()=>void;onSignOut:()=>void;error?:string;
+export function AccountControls({user,storageMode,onSettings,onSignOut,error}:{
+ user:User|null;storageMode:"local"|"cloud"|"hybrid";onSettings:()=>void;onSignOut:()=>void;error?:string;
 }){
  const [open,setOpen]=useState(false);
  const region=useRef<HTMLDivElement>(null);
@@ -28,6 +28,7 @@ export function AccountControls({user,onSettings,onSignOut,error}:{
   </button>
   {open&&<div className="finora-account-menu" role="menu" aria-label="Account options">
    <div className="finora-account-summary"><AccountAvatar user={user} size={43}/><div><strong>{user?name:"Guest workspace"}</strong><small>{user?.email||"Data saved in this browser"}</small></div></div>
+   {user&&storageMode!=="cloud"&&<p className="finora-local-signout-note">Local financial records remain in this browser after sign-out.</p>}
    <div className="finora-account-menu-actions">
     <button type="button" role="menuitem" onClick={openSettings}><Settings2 size={17}/> Account & storage</button>
     {user?<button type="button" role="menuitem" className="signout" onClick={onSignOut}><LogOut size={17}/> Sign out</button>:
