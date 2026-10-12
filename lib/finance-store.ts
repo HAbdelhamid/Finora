@@ -4,8 +4,9 @@ import { createJSONStorage, persist, type StateStorage } from "zustand/middlewar
 import { z } from "zod";
 import { makeSeed } from "./seed";
 import { defaultZakat, uid } from "./models";
-import type { Account, Budget, Debt, FinoraData, Goal, Investment, RecurringRule, Transaction, Workspace, WorkspaceKind } from "./models";
+import type { Account, Budget, Debt, FinoraData, Goal, Investment, RecurringRule, Subscription, Transaction, Workspace, WorkspaceKind } from "./models";
 import { isPositive } from "./ledger";
+import {advanceRenewalAfter} from "./subscriptions";
 
 type Snapshot=FinoraData;
 interface FinanceStore extends FinoraData {
@@ -26,6 +27,10 @@ interface FinanceStore extends FinoraData {
  repayDebt:(id:string,amount:number,accountId:string)=>boolean;
  addRecurring:(v:Omit<RecurringRule,"id">)=>void;
  removeRecurring:(id:string)=>void;
+ addSubscription:(v:Omit<Subscription,"id"|"lastPaidDate">)=>void;
+ updateSubscription:(id:string,patch:Partial<Subscription>)=>void;
+ removeSubscription:(id:string)=>void;
+ recordSubscriptionPayment:(id:string,date:string)=>boolean;
  restore:(snapshot:Snapshot)=>void;
  reset:()=>void;
 }
@@ -42,7 +47,15 @@ const storedSchema=z.object({
  goals:z.array(z.object({id:z.string(),workspaceId:z.string(),name:z.string(),target:z.number(),saved:z.number(),color:z.string()})),
  investments:z.array(z.object({id:z.string(),workspaceId:z.string(),name:z.string(),symbol:z.string(),units:z.number(),costPerUnit:z.number(),pricePerUnit:z.number(),assetClass:z.enum(["stocks","funds","crypto","other"])})),
  debts:z.array(z.object({id:z.string(),workspaceId:z.string(),name:z.string(),direction:z.enum(["owe","owed"]),principal:z.number(),paid:z.number()})),
- recurring:z.array(z.object({id:z.string(),workspaceId:z.string(),accountId:z.string(),name:z.string(),type:z.enum(["income","expense"]),amount:z.number(),category:z.string(),day:z.number(),enabled:z.boolean()}))
+ recurring:z.array(z.object({id:z.string(),workspaceId:z.string(),accountId:z.string(),name:z.string(),type:z.enum(["income","expense"]),amount:z.number(),category:z.string(),day:z.number(),enabled:z.boolean()})),
+ subscriptions:z.array(z.object({
+  id:z.string(),workspaceId:z.string(),accountId:z.string(),
+  name:z.string(),provider:z.string(),plan:z.string(),
+  category:z.enum(["mobile","internet","software","ai_tools","streaming","cloud","insurance","other"]),
+  amount:z.number().nonnegative(),currency:z.string().default("MAD"),conversionRate:z.number().positive().default(1),cycle:z.enum(["weekly","monthly","quarterly","yearly"]),
+  nextRenewal:z.string(),status:z.enum(["active","trial","paused","cancelled"]),
+  autoRenew:z.boolean(),website:z.string(),notes:z.string(),lastPaidDate:z.string().optional()
+ })).default([])
 });
 
 export function parseSnapshot(input:unknown):FinoraData|null {
@@ -57,7 +70,7 @@ const browserFinanceStorage:StateStorage={
  removeItem:(key)=>{if(typeof window!=="undefined")window.localStorage.removeItem(key);}
 };
 const seed=makeSeed();
-export const snapshotFromState=(s:FinanceStore):FinoraData=>({activeId:s.activeId,workspaces:s.workspaces,accounts:s.accounts,transactions:s.transactions,budgets:s.budgets,goals:s.goals,investments:s.investments,debts:s.debts,recurring:s.recurring});
+export const snapshotFromState=(s:FinanceStore):FinoraData=>({activeId:s.activeId,workspaces:s.workspaces,accounts:s.accounts,transactions:s.transactions,budgets:s.budgets,goals:s.goals,investments:s.investments,debts:s.debts,recurring:s.recurring,subscriptions:s.subscriptions});
 export const useFinance = create<FinanceStore>()(persist((set,get)=>({
  ...seed,
  select:(id)=>set(s=>s.workspaces.some(w=>w.id===id)?{activeId:id}:{}),
@@ -84,6 +97,22 @@ export const useFinance = create<FinanceStore>()(persist((set,get)=>({
  },
  addRecurring:(v)=>{if(!isPositive(v.amount))return;set(s=>({recurring:[...s.recurring,{...v,id:uid()}]}))},
  removeRecurring:(id)=>set(s=>({recurring:s.recurring.filter(x=>x.id!==id)})),
+ addSubscription:(v)=>{
+  if(!isPositive(v.amount)||!isPositive(v.conversionRate)||!get().accounts.some(a=>a.id===v.accountId&&a.workspaceId===v.workspaceId))return;
+  set(s=>({subscriptions:[...s.subscriptions,{...v,id:uid()}]}));
+ },
+ updateSubscription:(id,patch)=>set(s=>({subscriptions:s.subscriptions.map(sub=>sub.id===id?{...sub,...patch,id:sub.id,workspaceId:sub.workspaceId}:sub)})),
+ removeSubscription:(id)=>set(s=>({subscriptions:s.subscriptions.filter(sub=>sub.id!==id)})),
+ recordSubscriptionPayment:(id,date)=>{
+  const sub=get().subscriptions.find(s=>s.id===id);
+  if(!sub||!["active","trial"].includes(sub.status)||sub.lastPaidDate===sub.nextRenewal||!get().accounts.some(a=>a.id===sub.accountId&&a.workspaceId===sub.workspaceId)||!isPositive(sub.amount)||!isPositive(sub.conversionRate)||!date||sub.nextRenewal>date)return false;
+  const next=advanceRenewalAfter(sub.nextRenewal,sub.cycle,date);
+  set(s=>({
+   subscriptions:s.subscriptions.map(x=>x.id===id?{...x,nextRenewal:next,lastPaidDate:sub.nextRenewal,status:x.status==="trial"?"active":x.status}:x),
+   transactions:[{id:uid(),workspaceId:sub.workspaceId,accountId:sub.accountId,type:"expense",amount:Math.round(sub.amount*sub.conversionRate*100)/100,category:"Subscriptions",description:[sub.provider,sub.plan].filter(Boolean).join(" · ")+" ("+sub.amount+" "+sub.currency+")",date},...s.transactions]
+  }));
+  return true;
+ },
  restore:(v)=>{const parsed=parseSnapshot(v);if(!parsed)throw Error("Invalid Finora backup");set(parsed)},
  reset:()=>set(makeSeed())
 }),{

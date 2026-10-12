@@ -57,6 +57,19 @@ export interface RecurringRule {
   day: number; enabled: boolean;
 }
 
+export type SubscriptionCycle = "weekly" | "monthly" | "quarterly" | "yearly";
+export type SubscriptionStatus = "active" | "trial" | "paused" | "cancelled";
+export type SubscriptionCategory = "mobile" | "internet" | "software" | "ai_tools" | "streaming" | "cloud" | "insurance" | "other";
+
+export interface Subscription {
+ id: string; workspaceId: string; accountId: string;
+ name: string; provider: string; plan: string;
+ category: SubscriptionCategory; amount: number; currency: string; conversionRate: number; cycle: SubscriptionCycle;
+ nextRenewal: string; status: SubscriptionStatus;
+ autoRenew: boolean; website: string; notes: string;
+ lastPaidDate?: string;
+}
+
 export interface FinoraData {
   activeId: string;
   workspaces: Workspace[];
@@ -67,6 +80,7 @@ export interface FinoraData {
   investments: Investment[];
   debts: Debt[];
   recurring: RecurringRule[];
+  subscriptions: Subscription[];
 }
 
 export const incomeCategories = ["Salary","Freelance","Business sales","Rental income","Bonus","Gift","Other income"];

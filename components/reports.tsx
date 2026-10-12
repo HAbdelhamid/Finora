@@ -5,6 +5,7 @@ import {useFinance} from "@/lib/finance-store";
 import {categoryColors,formatMoney} from "@/lib/models";
 import {monthlySeries,monthReport,taxEstimate,workspaceItems} from "@/lib/ledger";
 import {CashFlowChart,Card,Metric} from "./widgets";
+import {useFinoraUi} from "@/components/ui/finora-feedback";
 
 const cell=(value:string|number)=>{
  const raw=String(value),safe=/^[=+@\-\t\r]/.test(raw)?"'"+raw:raw;
@@ -16,6 +17,7 @@ function download(name:string,content:string,mime:string){
 }
 export function Reports(){
  const s=useFinance(),w=s.workspaces.find(x=>x.id===s.activeId)!,d=workspaceItems(s,w.id);
+ const {notify}=useFinoraUi();
  const [month,setMonth]=useState(new Date().toISOString().slice(0,7));
  const report=monthReport(s,w.id,month),annual=taxEstimate(w,d.transactions,month.slice(0,4));
  const file="finora-"+w.kind+"-"+month;
@@ -24,24 +26,22 @@ export function Reports(){
   download(file+".csv",lines.map(line=>line.map(cell).join(",")).join("\r\n"),"text/csv");
  };
  const pdf=async()=>{
-  const {jsPDF}=await import("jspdf");const doc=new jsPDF({unit:"mm",format:"a4"});const money=(n:number)=>formatMoney(n,w.currency);
-  const ink=[27,44,62] as const;let y=24;
-  doc.setFillColor(18,155,127);doc.roundedRect(13,11,184,32,4,4,"F");
-  doc.setFont("helvetica","bold");doc.setFontSize(22);doc.setTextColor(255);doc.text("Finora / Monthly Bilan",20,25);
-  doc.setFontSize(10);doc.setFont("helvetica","normal");doc.text(w.name+"  |  "+month+"  |  "+w.currency,20,34);
-  doc.setTextColor(...ink);y=56;
-  doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text("Financial summary",16,y);y+=10;
-  doc.setFont("helvetica","normal");doc.setFontSize(10);
-  for(const [name,n] of [["Income",report.income],["Expenses",report.expense],["Net movement",report.net]] as const){doc.text(name,16,y);doc.text(money(n),188,y,{align:"right"});y+=8;}
-  y+=6;doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text("Spending by category",16,y);y+=9;
-  doc.setFont("helvetica","normal");doc.setFontSize(10);
-  for(const item of report.expensesByCategory){if(y>270){doc.addPage();y=20;}doc.text(item.name.slice(0,65),16,y);doc.text(money(item.value),188,y,{align:"right"});y+=7}
-  y+=7;if(y>270){doc.addPage();y=20;}doc.setFont("helvetica","bold");doc.setFontSize(12);doc.text("Transactions",16,y);y+=9;
-  doc.setFont("helvetica","normal");doc.setFontSize(9);
-  for(const t of report.transactions.sort((a,b)=>a.date.localeCompare(b.date))){if(y>275){doc.addPage();y=20;}doc.text(t.date,16,y);doc.text(t.description.slice(0,70),48,y);doc.text((t.type==="expense"?"-":"")+money(t.amount),191,y,{align:"right"});y+=7;}
-  if(y>263){doc.addPage();y=20;}y+=8;doc.setFontSize(8);doc.setTextColor(110);
-  doc.text("Personal records only; not a tax filing or audited statement. Values are user-entered.",16,y);
-  doc.save(file+".pdf");
+  try {
+   const {jsPDF}=await import("jspdf");
+   const {buildPremiumStatement}=await import("@/lib/premium-pdf");
+   const doc=new jsPDF({unit:"mm",format:"a4"});
+   buildPremiumStatement(doc,{
+    workspaceName:w.name,kind:w.kind,currency:w.currency,month,
+    income:report.income,expenses:report.expense,net:report.net,
+    categories:report.expensesByCategory,balances:report.balances,
+    transactions:report.transactions,accountNames:Object.fromEntries(d.accounts.map(a=>[a.id,a.name])),
+    subscriptions:d.subscriptions
+   });
+   doc.save(file+".pdf");
+   notify("Premium monthly statement downloaded.","success");
+  } catch {
+   notify("Unable to generate the report. Please try again.","error");
+  }
  };
  return <div className="page-stack"><div className="section-intro"><h2>Reports & statements</h2><p>Your complete monthly financial bilan, with exports ready for your accountant or personal archive.</p></div>
  <Card tourId="reports" title="Monthly financial bilan" subtitle="Choose a reporting period and export your records" action={<input className="month-input" aria-label="Report month" type="month" value={month} onChange={e=>setMonth(e.target.value)}/>}>
