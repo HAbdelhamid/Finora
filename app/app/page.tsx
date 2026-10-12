@@ -51,7 +51,7 @@ function FinanceApp(){
  const navigate=(screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"smooth"})};
  const navIcon=(kind:string)=>kind==="personal"?<UserRound size={16}/>:kind==="freelance"?<BriefcaseBusiness size={16}/>:<Building2 size={16}/>;
  return <div className="app-shell">
- <aside className={"side-panel "+(drawer?"side-open":"")}>
+ <aside id="finora-sidebar" className={"side-panel "+(drawer?"side-open":"")}>
   <div className="wordmark"><div className="wordmark-symbol"><span>f</span><i/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
   <div className="workspace-caption">ACTIVE WORKSPACE</div>
   <div className="workspace-switch"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
@@ -60,7 +60,21 @@ function FinanceApp(){
   <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Choose local, cloud or hybrid storage from the Storage page.</p></div><div className="profile"><div className="profile-avatar">F</div><div><b>Finora workspace</b><small>{sync.user?"Google account connected":"Your private finance space"}</small></div></div></div>
  </aside>
  {drawer&&<button className="drawer-shade" aria-label="Close menu" onClick={()=>setDrawer(false)}/>}
- <div className="body-wrap"><header className="top-bar"><div className="top-breadcrumb"><button className="mobile-menu" aria-label="Open menu" onClick={()=>setDrawer(true)}><Menu size={22}/></button><span>My workspace</span><ArrowRight size={14}/><strong>{label(nav)}</strong></div><div className="top-actions"><span className="top-date"><CalendarDays size={16}/>{new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</span><span className="local-badge"><span/> {sync.mode==="local"?(w.demo?"Demo · Local":"Local device"):sync.mode==="cloud"?"Cloud storage":"Hybrid sync"}</span><button className="icon-outline" aria-label="Toggle theme" onClick={()=>setDark(v=>!v)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button><div className="top-avatar">F</div></div></header>
+ <div className="body-wrap"><header className="top-bar">
+  <div className="top-breadcrumb">
+   <button className="mobile-menu" type="button" aria-label="Open navigation menu" aria-expanded={drawer} aria-controls="finora-sidebar" onClick={()=>setDrawer(true)}><Menu size={21}/></button>
+   <a className="mobile-brand" href="/" aria-label="Finora homepage"><span className="mobile-brand-mark">f.</span><span className="mobile-brand-word">finora<span>.</span></span></a>
+   <span className="crumb-root">My workspace</span><ArrowRight className="crumb-arrow" size={14}/><strong className="crumb-current">{label(nav)}</strong>
+  </div>
+  <div className="top-actions">
+   <span className="top-date"><CalendarDays size={16}/>{new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</span>
+   <span className="local-badge" title={sync.mode==="local"?(w.demo?"Demo · Local":"Saved on this device"):sync.mode==="cloud"?"Cloud storage":"Local + cloud synchronization"} aria-label={sync.mode==="local"?(w.demo?"Demo, local storage":"Local device storage"):sync.mode==="cloud"?"Cloud storage":"Hybrid sync"}>
+    <span className="status-dot" aria-hidden="true"/><span className="status-long">{sync.mode==="local"?(w.demo?"Demo · Local":"Local device"):sync.mode==="cloud"?"Cloud storage":"Hybrid sync"}</span><span className="status-short" aria-hidden="true">{sync.mode==="local"?(w.demo?"Demo":"Local"):sync.mode==="cloud"?"Cloud":"Hybrid"}</span>
+   </span>
+   <button className="icon-outline" type="button" aria-label={dark?"Use light theme":"Use dark theme"} onClick={()=>setDark(v=>!v)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button>
+   <button className="top-avatar" type="button" onClick={()=>navigate("Storage")} aria-label="Open account and storage settings" title={sync.user?.email||"Account and storage settings"}>{sync.user?.email?.charAt(0).toUpperCase()||"F"}</button>
+  </div>
+ </header>
  <main className="content-area"><div className="content-top"><div><span className="overline">FINORA / YOUR FINANCIAL COMMAND CENTER</span><h1>{label(nav)}</h1></div><div className="top-utility"><span className="mini-badge">{w.currency}</span><span className="mini-badge">{w.kind==="personal"?"Personal":w.kind==="company"?"Business":"Independent"}</span></div></div>
  {nav==="Overview"&&<Overview navigate={navigate} openNew={()=>navigate("Transactions")}/>}
  {nav==="Transactions"&&<Transactions/>}
