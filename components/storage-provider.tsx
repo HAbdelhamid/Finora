@@ -84,15 +84,24 @@ export function StorageProvider({children}:{children:ReactNode}){
   const snapshot=getFinoraSnapshot(),hash=fingerprint(snapshot);
   if(hash===lastSyncedRef.current){setStatus("synced");return}
   lockRef.current=true;setStatus("syncing");setError("");
+  let successful=false;
   try{
    const result=await commitCloudSnapshot(revRef.current,snapshot);
    if(result.conflict){
     const remote=await loadCloudSnapshot(user.id);
     if(remote){setConflict({remote,requestedMode:mode});setStatus("conflict");}
     else{setStatus("offline");setError("Cloud changed unexpectedly; nothing was overwritten.");}
-   }else{revRef.current=result.revision;lastSyncedRef.current=hash;setStatus("synced");}
+   }else{revRef.current=result.revision;lastSyncedRef.current=hash;successful=true;setStatus("synced");}
   }catch(e){setError(e instanceof Error?e.message:"Could not save to cloud.");setStatus("offline")}
-  finally{lockRef.current=false}
+  finally{
+   lockRef.current=false;
+   // If another edit landed during the network request, queue it after the
+   // successful commit. Never retry automatically after a conflict or error.
+   if(successful&&fingerprint(getFinoraSnapshot())!==hash){
+    if(timerRef.current)clearTimeout(timerRef.current);
+    timerRef.current=setTimeout(()=>{void syncNow()},1100);
+   }
+  }
  },[mode,user?.id,ready,conflict]);
 
  useEffect(()=>{
