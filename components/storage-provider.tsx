@@ -114,6 +114,16 @@ export function StorageProvider({children}:{children:ReactNode}){
   return()=>{unsubscribe();if(timerRef.current)clearTimeout(timerRef.current)};
  },[mode,user?.id,ready,conflict,syncNow]);
 
+ useEffect(()=>{
+  if(mode!=="cloud"||!ready)return;
+  const unsaved=()=>fingerprint(getFinoraSnapshot())!==lastSyncedRef.current;
+  const warn=(event:BeforeUnloadEvent)=>{if(unsaved()){event.preventDefault();event.returnValue="";}};
+  const flush=()=>{if(document.visibilityState==="hidden"&&unsaved())void syncNow()};
+  window.addEventListener("beforeunload",warn);
+  document.addEventListener("visibilitychange",flush);
+  return()=>{window.removeEventListener("beforeunload",warn);document.removeEventListener("visibilitychange",flush)};
+ },[mode,ready,syncNow]);
+
  const chooseMode=async(next:StorageMode)=>{
   if(next===mode)return;
   setError("");
@@ -166,7 +176,8 @@ export function StorageProvider({children}:{children:ReactNode}){
 
  const signIn=async()=>{try{setError("");await googleSignIn()}catch(e){setError(e instanceof Error?e.message:"Sign-in failed.")}};
  const signOut=async()=>{try{
-  if(mode==="cloud"&&status==="offline")return setError("Unsaved cloud-only changes may exist. Export a backup before signing out.");
+  if(mode==="cloud"&&(status==="offline"||fingerprint(getFinoraSnapshot())!==lastSyncedRef.current))
+   return setError("There are unsaved cloud-only changes. Wait for sync or download a backup before signing out.");
   await signOutCloud();setUser(null);revRef.current=0;lastSyncedRef.current="";
   if(mode==="cloud"){suspendRef.current=true;useFinance.getState().reset();suspendRef.current=false}
  }catch(e){setError(e instanceof Error?e.message:"Sign out failed.")}};
