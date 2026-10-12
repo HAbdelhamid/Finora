@@ -1,76 +1,41 @@
-"use client";
-import {useEffect,useRef,useState} from "react";
-import {Activity,ArrowRight,BookOpen,BriefcaseBusiness,Building2,CalendarDays,ChartNoAxesCombined,ChevronDown,Cloud,Command,FileChartColumn,Landmark,LayoutDashboard,Menu,Moon,Plus,Settings2,ShieldCheck,Sun,Target,UserRound,WalletCards,X} from "lucide-react";
-import {useFinance} from "@/lib/finance-store";
-import {Overview} from "@/components/overview";
-import {Transactions} from "@/components/transactions";
-import {Planning} from "@/components/planning";
-import {Accounts} from "@/components/accounts";
-import {Investments} from "@/components/investments";
-import {Reports} from "@/components/reports";
-import {Zakat} from "@/components/zakat";
-import {Workspaces} from "@/components/workspaces";
-import {StorageProvider,useStorage} from "@/components/storage-provider";
-import {StorageSettings} from "@/components/storage-settings";
-import {formatMoney} from "@/lib/models";
+import Link from "next/link";
+import type {Metadata} from "next";
+import {ArrowRight,ArrowUpRight,BarChart3,BriefcaseBusiness,CalendarClock,Check,ChevronRight,CircleDollarSign,Cloud,FileDown,Fingerprint,HardDrive,Layers3,LockKeyhole,Menu,ShieldCheck,Sparkles,Target,TrendingUp,Wallet,Zap} from "lucide-react";
 
-const links=[
- {name:"Overview",icon:LayoutDashboard,group:"WORKSPACE"},
- {name:"Transactions",icon:Activity,group:"WORKSPACE"},
- {name:"Planning",icon:Target,group:"WORKSPACE"},
- {name:"Accounts",icon:WalletCards,group:"WORKSPACE"},
- {name:"Investments",icon:ChartNoAxesCombined,group:"INSIGHTS"},
- {name:"Reports",icon:FileChartColumn,group:"INSIGHTS"},
- {name:"Zakat",icon:BookOpen,group:"INSIGHTS"},
- {name:"Workspaces",icon:Settings2,group:"MANAGE"},
- {name:"Storage",icon:Cloud,group:"MANAGE"}
+export const metadata:Metadata={
+ title:"Finora | See your money clearly",
+ description:"A beautiful finance command center for income, expenses, budgets, savings, investments, small businesses and Zakat. Track locally or connect securely to the cloud.",
+ openGraph:{title:"Finora — Money made clear",description:"One beautiful space for your financial life.",type:"website"}
+};
+
+const features=[
+ {icon:Wallet,name:"Smart tracking",text:"Make sense of salaries, side income, bills and daily spending across accounts.",tone:"mint"},
+ {icon:BarChart3,name:"Visual insights",text:"Understand your cash flow, category spending and financial trends at a glance.",tone:"violet"},
+ {icon:Target,name:"Budgets & goals",text:"Set monthly limits, track savings milestones and stay on top of repayments.",tone:"peach"},
+ {icon:TrendingUp,name:"Investments",text:"Keep an eye on positions, cost basis and valuations you record yourself.",tone:"sky"},
+ {icon:FileDown,name:"Monthly reports",text:"Bring your financial story together with downloadable PDF and CSV statements.",tone:"mint"},
+ {icon:CalendarClock,name:"Zakat planning",text:"Estimate your nisab and hawl timeline with editable assumptions and reminders.",tone:"violet"}
 ];
-const label=(name:string)=>name==="Reports"?"Reports & Bilan":name==="Zakat"?"Zakat Planner":name;
-function FinanceApp(){
- const [mounted,setMounted]=useState(false),[nav,setNav]=useState("Overview"),[drawer,setDrawer]=useState(false);
- const [dark,setDark]=useState(false);
- const [navHasMore,setNavHasMore]=useState(false);
- const navRef=useRef<HTMLDivElement>(null);
- const sync=useStorage();
- const s=useFinance();
- useEffect(()=>setMounted(true),[]);
- useEffect(()=>{if(mounted){document.documentElement.dataset.theme=dark?"dark":"light"}},[mounted,dark]);
- useEffect(()=>{
-  if(!mounted)return;
-  const element=navRef.current;if(!element)return;
-  const recalc=()=>setNavHasMore(element.scrollTop+element.clientHeight<element.scrollHeight-8);
-  const resize=new ResizeObserver(recalc);resize.observe(element);
-  for(const child of Array.from(element.children))resize.observe(child);
-  element.addEventListener("scroll",recalc,{passive:true});
-  recalc();
-  return()=>{resize.disconnect();element.removeEventListener("scroll",recalc)};
- },[mounted]);
- if(!mounted)return <div className="boot-screen"><span className="boot-logo">f<span>.</span></span><p>Preparing your financial command center…</p></div>;
- const w=s.workspaces.find(x=>x.id===s.activeId)||s.workspaces[0];
- const navigate=(screen:string)=>{setNav(screen);setDrawer(false);window.scrollTo({top:0,behavior:"smooth"})};
- const navIcon=(kind:string)=>kind==="personal"?<UserRound size={16}/>:kind==="freelance"?<BriefcaseBusiness size={16}/>:<Building2 size={16}/>;
- return <div className="app-shell">
- <aside className={"side-panel "+(drawer?"side-open":"")}>
-  <div className="wordmark"><div className="wordmark-symbol"><span>f</span><i/></div><span>finora<span className="brand-period">.</span></span><button className="mobile-close" onClick={()=>setDrawer(false)} aria-label="Close navigation"><X size={20}/></button></div>
-  <div className="workspace-caption">ACTIVE WORKSPACE</div>
-  <div className="workspace-switch"><div className="switch-icon">{navIcon(w.kind)}</div><div className="flex-fill"><strong>{w.name}</strong><small>{w.kind==="freelance"?"Auto-entrepreneur":w.kind==="company"?"Company":"Personal"} · {w.currency}</small></div><ChevronDown size={15}/>
-   <select aria-label="Switch workspace" title="Switch workspace" value={w.id} onChange={e=>s.select(e.target.value)}>{s.workspaces.map(x=><option key={x.id} value={x.id}>{x.name}</option>)}</select></div>
-  <div className="nav-scroll-wrap"><div ref={navRef} className="side-scroll">{["WORKSPACE","INSIGHTS","MANAGE"].map(group=><div className="nav-group" key={group}><div className="nav-group-title">{group}</div>{links.filter(x=>x.group===group).map(x=><button className={"side-link "+(nav===x.name?"active":"")} key={x.name} onClick={()=>navigate(x.name)}><x.icon size={18} strokeWidth={1.9}/><span>{label(x.name)}</span>{nav===x.name&&<span className="active-indicator"/>}</button>)}</div>)}</div>{navHasMore&&<button className="nav-more" aria-label="More navigation below" onClick={()=>navRef.current?.scrollBy({top:190,behavior:"smooth"})}>Scroll for more <ChevronDown size={14}/></button>}</div>
-  <div className="sidebar-foot"><div className="sidebar-tip"><ShieldCheck size={20}/><b>Your financial space</b><p>Choose local, cloud or hybrid storage from the Storage page.</p></div><div className="profile"><div className="profile-avatar">F</div><div><b>Finora workspace</b><small>{sync.user?"Google account connected":"Your private finance space"}</small></div></div></div>
- </aside>
- {drawer&&<button className="drawer-shade" aria-label="Close menu" onClick={()=>setDrawer(false)}/>}
- <div className="body-wrap"><header className="top-bar"><div className="top-breadcrumb"><button className="mobile-menu" aria-label="Open menu" onClick={()=>setDrawer(true)}><Menu size={22}/></button><span>My workspace</span><ArrowRight size={14}/><strong>{label(nav)}</strong></div><div className="top-actions"><span className="top-date"><CalendarDays size={16}/>{new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</span><span className="local-badge"><span/> {sync.mode==="local"?(w.demo?"Demo · Local":"Local device"):sync.mode==="cloud"?"Cloud storage":"Hybrid sync"}</span><button className="icon-outline" aria-label="Toggle theme" onClick={()=>setDark(v=>!v)}>{dark?<Sun size={18}/>:<Moon size={18}/>}</button><div className="top-avatar">F</div></div></header>
- <main className="content-area"><div className="content-top"><div><span className="overline">FINORA / YOUR FINANCIAL COMMAND CENTER</span><h1>{label(nav)}</h1></div><div className="top-utility"><span className="mini-badge">{w.currency}</span><span className="mini-badge">{w.kind==="personal"?"Personal":w.kind==="company"?"Business":"Independent"}</span></div></div>
- {nav==="Overview"&&<Overview navigate={navigate} openNew={()=>navigate("Transactions")}/>}
- {nav==="Transactions"&&<Transactions/>}
- {nav==="Planning"&&<Planning/>}
- {nav==="Accounts"&&<Accounts/>}
- {nav==="Investments"&&<Investments/>}
- {nav==="Reports"&&<Reports/>}
- {nav==="Zakat"&&<Zakat/>}
- {nav==="Workspaces"&&<Workspaces/>}
- {nav==="Storage"&&<StorageSettings/>}
- </main><footer className="main-footer"><span>© 2026 Finora · Make every decision count.</span><span>{sync.mode==="local"?"Local device":sync.mode==="hybrid"?"Local + cloud":"Cloud"} · Not financial, tax or religious advice</span></footer></div></div>;
+const solutions=[
+ {num:"01",icon:Wallet,title:"Your everyday life",text:"Personal accounts, salary, spending, savings goals, household budgets.",tag:"PERSONAL FINANCES"},
+ {num:"02",icon:BriefcaseBusiness,title:"Your independent work",text:"Track client revenue, business spending and user-configured tax scenarios.",tag:"AUTO-ENTREPRENEUR"},
+ {num:"03",icon:Layers3,title:"Your business finances",text:"Separate your company's accounts, liabilities and performance in one workspace.",tag:"COMPANY"}
+];
+function Brand(){return <Link className="site-brand" href="/" aria-label="Finora homepage"><span className="site-brand-mark">f<span>•</span></span><span>finora<span className="site-brand-dot">.</span></span></Link>}
+export default function Landing(){
+ return <div className="site">
+ <header className="site-header"><div className="site-container site-header-inner"><Brand/><nav className="site-navigation" aria-label="Main navigation"><a href="#features">Features</a><a href="#for-you">Who it's for</a><a href="#security">Privacy</a></nav><div className="site-header-actions"><Link className="site-login" href="/login">Sign in</Link><Link className="site-nav-cta" href="/signup">Get started <ArrowRight size={16}/></Link></div></div></header>
+ <main>
+ <section className="site-hero"><div className="site-glow" aria-hidden="true"/><div className="site-container site-hero-grid">
+  <div className="site-hero-copy"><span className="site-eyebrow"><span className="site-eyebrow-dot"/> MONEY, WITHOUT THE MYSTERY</span><h1>Make sense of<br/><span>your money.</span><br/>Make more of life.</h1><p>Finally, one beautiful place to see your income, stay on top of expenses, grow your savings and make financial decisions with confidence.</p><div className="site-hero-actions"><Link className="site-btn-primary" href="/signup">Get started for free <ArrowRight size={18}/></Link><Link className="site-btn-secondary" href="/app?demo=1"><Sparkles size={17}/> Explore live demo</Link></div><div className="site-hero-foot"><div className="site-mini-avatars"><span>F</span><span>₿</span><span>€</span></div><p>For your personal life, side projects & business.<br/><strong>No bank connection required.</strong></p></div></div>
+  <div className="site-product-art" aria-label="Illustrative preview of Finora's finance dashboard"><div className="site-art-halo"/><div className="site-preview"><div className="site-preview-top"><div className="site-preview-brand"><span className="site-preview-f">f.</span><strong>Finora</strong><span className="site-demo-label">ILLUSTRATIVE PREVIEW</span></div><span className="site-preview-date">October 2026 <ChevronRight size={12}/></span></div><div className="site-preview-heading"><span>Financial overview</span><strong>Know where you stand.</strong></div><div className="site-preview-stats"><div className="site-preview-balance"><span>Available balance</span><strong>24,680 <small>MAD</small></strong><span className="site-stat-foot"><TrendingUp size={12}/> Example account</span></div><div className="site-preview-revenue"><span>Monthly income</span><strong>12,400 <small>MAD</small></strong><span className="site-stat-foot">Illustrative only</span></div></div><div className="site-preview-chart"><div className="site-preview-chart-head"><div><strong>Cash flow overview</strong><small>Income vs. expenses</small></div><span><i/> 6 months</span></div><svg viewBox="0 0 470 148" preserveAspectRatio="none" role="img" aria-label="Decorative chart comparing income and expenses"><defs><linearGradient id="area" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#13b596" stopOpacity=".19"/><stop offset="1" stopColor="#13b596" stopOpacity="0"/></linearGradient></defs><path d="M0 132H470M0 91H470M0 50H470M0 9H470" stroke="#e8efed" strokeDasharray="4 4" fill="none"/><path d="M5 90C45 84 55 36 91 50S155 101 185 80S248 31 278 55S332 11 369 29S426 44 464 14L464 145L5 145Z" fill="url(#area)"/><path d="M5 90C45 84 55 36 91 50S155 101 185 80S248 31 278 55S332 11 369 29S426 44 464 14" fill="none" stroke="#16b48e" strokeWidth="3.4" strokeLinecap="round"/><path d="M5 108C43 95 67 117 94 108S158 78 185 93S245 102 278 97S338 65 369 80S427 99 464 61" fill="none" stroke="#8282de" strokeWidth="2.8" strokeLinecap="round"/></svg><div className="site-preview-months"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div></div><div className="site-preview-bottom"><div><span className="site-dot mint"/> Groceries <strong>1,250 MAD</strong></div><div><span className="site-dot lilac"/> Housing <strong>3,200 MAD</strong></div></div></div>
+  <div className="site-floating-note"><span className="site-float-icon"><ShieldCheck size={20}/></span><div><strong>Your space. Your choice.</strong><small>Local, cloud, or both</small></div></div>
+  </div>
+ </div><div className="site-container site-hero-tagline"><span><Check size={15}/> Start without a bank account</span><span><Check size={15}/> Your finances stay separated</span><span><Check size={15}/> Export your own data</span></div></section>
+ <section className="site-section site-features" id="features"><div className="site-container"><div className="site-section-heading"><span className="site-eyebrow">THE COMPLETE PICTURE</span><h2>Everything you need.<br/><span>Nothing you don't.</span></h2><p>Powerful tools, thoughtfully designed, so managing your finances feels less like work.</p></div><div className="site-feature-grid">{features.map(f=><article className="site-feature-card" key={f.name}><div className={"site-feature-icon "+f.tone}><f.icon size={23} strokeWidth={1.8}/></div><h3>{f.name}</h3><p>{f.text}</p><span className="site-feature-tick"><Check size={15}/></span></article>)}</div></div></section>
+ <section className="site-section site-solutions" id="for-you"><div className="site-container"><div className="site-section-heading"><span className="site-eyebrow">ONE PLATFORM, ALL SIDES OF YOU</span><h2>Built for more than<br/><span>one kind of life.</span></h2><p>Different money deserves different spaces. Give every part of your financial life the attention it needs.</p></div><div className="site-solution-grid">{solutions.map(x=><article className="site-solution-card" key={x.num}><div className="site-solution-top"><span>{x.num}</span><x.icon size={23}/></div><span className="site-solution-tag">{x.tag}</span><h3>{x.title}</h3><p>{x.text}</p></article>)}</div></div></section>
+ <section className="site-section site-security" id="security"><div className="site-container site-security-grid"><div><span className="site-eyebrow">YOU STAY IN CONTROL</span><h2>Your finances.<br/><span>Your rules.</span></h2><p>Work privately in your browser, sign in for cloud storage, or use both. Decide where your records live, with exportable backups and account-specific access controls.</p><Link className="site-text-link" href="/signup">Choose your way to start <ArrowRight size={17}/></Link></div><div className="site-privacy-options"><div><span className="site-privacy-icon"><HardDrive size={23}/></span><div><strong>On this device</strong><p>Get started without registration; data stays in your browser.</p></div><Check size={19}/></div><div><span className="site-privacy-icon"><Cloud size={23}/></span><div><strong>Private cloud storage</strong><p>Sign in with Google or email and choose online saving.</p></div><Check size={19}/></div><div><span className="site-privacy-icon"><LockKeyhole size={23}/></span><div><strong>Both, with control</strong><p>Keep local and remote copies with conflict checks and backups.</p></div><Check size={19}/></div></div></div></section>
+ <section className="site-container"><div className="site-final-cta"><div className="site-cta-deco" aria-hidden="true"/><span className="site-eyebrow">GET STARTED TODAY</span><h2>Your financial clarity<br/>starts here.</h2><p>Start in minutes. You decide where your data lives.</p><div><Link className="site-btn-primary" href="/signup">Create your account <ArrowRight size={18}/></Link><Link className="site-cta-alt" href="/app?mode=local">Or continue without an account <ArrowUpRight size={15}/></Link></div></div></section>
+ </main><footer className="site-footer"><div className="site-container"><div><Brand/><p>Money made clearer, every day.</p></div><nav aria-label="Footer navigation"><a href="#features">Features</a><a href="#security">Privacy</a><Link href="/login">Sign in</Link><Link href="/app?demo=1">Try demo</Link></nav><small>© 2026 Finora. Not financial, tax or religious advice.</small></div></footer>
+ </div>;
 }
-
-export default function FinoraPage(){return <StorageProvider><FinanceApp/></StorageProvider>}
