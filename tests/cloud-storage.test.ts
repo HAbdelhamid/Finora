@@ -1,5 +1,5 @@
 import {afterEach,describe,expect,it,vi} from "vitest";
-import {readMode} from "../lib/cloud-storage";
+import {googleProviderEnabled,readMode} from "../lib/cloud-storage";
 import {parseSnapshot} from "../lib/finance-store";
 import {makeSeed} from "../lib/seed";
 
@@ -36,5 +36,17 @@ describe("cloud snapshot validation",()=>{
   const seed=makeSeed();
   expect(parseSnapshot({...seed,workspaces:[{...seed.workspaces[0],kind:"admin"}]})).toBeNull();
   expect(parseSnapshot({...seed,workspaces:[{...seed.workspaces[0],zakat:null}]})).toBeNull();
+ });
+});
+
+describe("OAuth provider availability",()=>{
+ it("detects Google disabled from public Supabase Auth settings",()=>{
+  expect(googleProviderEnabled({external:{google:false,github:true}})).toBe(false);
+ });
+ it("allows enabled Google and treats unknown schemas as inconclusive",()=>{
+  expect(googleProviderEnabled({external:{google:true}})).toBe(true);
+  expect(googleProviderEnabled({external:{}})).toBe(null);
+  expect(googleProviderEnabled(null)).toBe(null);
+  expect(googleProviderEnabled("invalid")).toBe(null);
  });
 });
