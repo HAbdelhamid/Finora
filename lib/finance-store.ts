@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
 import { z } from "zod";
 import { makeSeed } from "./seed";
 import { defaultZakat, uid } from "./models";
@@ -49,8 +49,15 @@ export function parseSnapshot(input:unknown):FinoraData|null {
  const r=storedSchema.safeParse(input);
  return r.success&&r.data.workspaces.length>0?r.data:null;
 }
+// Existing local snapshots are retained unless a user explicitly chooses cloud-only
+// AND the first remote save has been confirmed. This preserves v2 upgrades.
+const browserFinanceStorage:StateStorage={
+ getItem:(key)=>typeof window!=="undefined"&&window.localStorage.getItem("finora-storage-mode")!=="cloud"?window.localStorage.getItem(key):null,
+ setItem:(key,value)=>{if(typeof window!=="undefined"&&window.localStorage.getItem("finora-storage-mode")!=="cloud")window.localStorage.setItem(key,value);},
+ removeItem:(key)=>{if(typeof window!=="undefined")window.localStorage.removeItem(key);}
+};
 const seed=makeSeed();
-const data=(s:FinanceStore):FinoraData=>({activeId:s.activeId,workspaces:s.workspaces,accounts:s.accounts,transactions:s.transactions,budgets:s.budgets,goals:s.goals,investments:s.investments,debts:s.debts,recurring:s.recurring});
+export const snapshotFromState=(s:FinanceStore):FinoraData=>({activeId:s.activeId,workspaces:s.workspaces,accounts:s.accounts,transactions:s.transactions,budgets:s.budgets,goals:s.goals,investments:s.investments,debts:s.debts,recurring:s.recurring});
 export const useFinance = create<FinanceStore>()(persist((set,get)=>({
  ...seed,
  select:(id)=>set(s=>s.workspaces.some(w=>w.id===id)?{activeId:id}:{}),
@@ -82,6 +89,10 @@ export const useFinance = create<FinanceStore>()(persist((set,get)=>({
 }),{
  name:"finora-v2",
  version:2,
- partialize:state=>data(state),
+ partialize:state=>snapshotFromState(state),
+ storage:createJSONStorage(()=>browserFinanceStorage),
  merge:(persisted,current)=>({...current,...(parseSnapshot(persisted)??makeSeed())})
 }));
+
+/** Strictly the financial snapshot (without store actions). */
+export const getFinoraSnapshot=()=>snapshotFromState(useFinance.getState());
