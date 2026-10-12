@@ -41,12 +41,12 @@ export function AuthScreen({initialMode}:{initialMode:"login"|"signup"}){
      data:{full_name:fullName.trim().slice(0,100)}
     }});
     if(error)throw error;
-    if(data.session){window.location.replace("/app");return}
+    if(data.session){sessionStorage.removeItem("finora-entry-choice");window.location.replace("/app");return}
     setMessage("Check your email to confirm your account, then sign in. The email may take a minute to arrive.");
    }else{
     const {error}=await client.auth.signInWithPassword({email:normalized,password});
     if(error)throw error;
-    window.location.replace("/app");return;
+    sessionStorage.removeItem("finora-entry-choice");window.location.replace("/app");return;
    }
   }catch(e){setError(e instanceof Error?e.message:"Couldn't complete this request. Please try again.")}
   finally{setLoading(false)}

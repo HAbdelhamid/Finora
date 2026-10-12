@@ -17,7 +17,7 @@ export default function AuthCallback(){
     if(code){const {error}=await client.auth.exchangeCodeForSession(code);if(error)throw error;}
     const {data,error}=await client.auth.getUser();
     if(error||!data.user)throw Error("No active session was found. Please try signing in.");
-    if(alive)window.location.replace(destination);
+    if(alive){sessionStorage.removeItem("finora-entry-choice");window.location.replace(destination)}
    }catch(e){if(alive)setError(e instanceof Error?e.message:"Could not finish signing in.")}
   }
   void finish();return()=>{alive=false};
