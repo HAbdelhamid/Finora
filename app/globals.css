@@ -19,3 +19,61 @@ html[data-theme=dark]{--bg:#111a20;--paper:#1a2930;--ink:#e5f0f1;--border:#32434
 
 /* Keep sidebar navigation scrollable without exposing a browser scrollbar. */
 @media (max-height: 800px){.side-panel{padding-top:18px;padding-bottom:12px}.wordmark{padding-bottom:23px}.workspace-switch{margin-bottom:19px;min-height:58px}.nav-group{margin-bottom:16px}.side-link{padding-top:9px;padding-bottom:9px}.sidebar-tip{display:none}.sidebar-foot{padding-top:10px}.profile{padding-top:11px}}
+
+
+/* Accessible, quiet scrollbar system — visible so users can discover more content. */
+:root{scrollbar-width:thin;scrollbar-color:#bfced3 #f2f6f8}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:#f2f6f8;border-radius:12px}
+*::-webkit-scrollbar-thumb{background:#bbccd1;border-radius:12px;border:2px solid #f2f6f8;min-height:32px}
+*::-webkit-scrollbar-thumb:hover{background:#83a5a8}
+html[data-theme=dark]{scrollbar-color:#58787d #17272e}
+html[data-theme=dark] *::-webkit-scrollbar-track{background:#17272e}
+html[data-theme=dark] *::-webkit-scrollbar-thumb{background:#48646d;border-color:#17272e}
+html[data-theme=dark] *::-webkit-scrollbar-thumb:hover{background:#5c9c92}
+
+/* The sidebar scroll affordance keeps the footer pinned, with a subtle mint rail. */
+.nav-scroll-wrap{min-height:0;flex:1 1 auto;display:flex;position:relative;overflow:hidden}
+.side-panel .side-scroll{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;padding-right:6px;padding-bottom:30px;scrollbar-width:thin;scrollbar-color:#477e74 transparent;-ms-overflow-style:auto;scroll-behavior:smooth;overscroll-behavior-y:contain}
+.side-panel .side-scroll::-webkit-scrollbar{display:block;width:5px}
+.side-panel .side-scroll::-webkit-scrollbar-track{background:#ffffff10;border-radius:10px}
+.side-panel .side-scroll::-webkit-scrollbar-thumb{background:#548c7e;border:0;border-radius:12px;min-height:30px}
+.side-panel .side-scroll:hover::-webkit-scrollbar-thumb{background:#75bb9e}
+.side-panel .side-scroll::-webkit-scrollbar-thumb:hover{background:#9de8c7}
+.nav-more{position:absolute;bottom:0;left:0;right:10px;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(to bottom,rgba(19,42,43,0),#132a2b 32%,#132a2b);border:0;color:#8fe1c4;padding:22px 7px 9px;font-size:10px;font-weight:800;letter-spacing:.4px;z-index:2;transition:color .18s}
+.nav-more:hover{color:white}.nav-more svg{animation:more-gesture 2.5s ease-in-out infinite}
+@keyframes more-gesture{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@media(prefers-reduced-motion:reduce){.nav-more svg{animation:none}.side-panel .side-scroll{scroll-behavior:auto}}
+@media(max-width:800px){.nav-more{right:6px}}
+
+/* User-directed storage setup, Google sign-in and conflict controls. */
+.storage-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-bottom:20px}
+.storage-mode{position:relative;display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:var(--input);border:1px solid var(--border);border-radius:14px;padding:18px;gap:13px;min-height:174px;color:var(--ink);transition:border-color .2s,box-shadow .2s,transform .2s}
+.storage-mode:hover{transform:translateY(-2px);border-color:#70c9ad;box-shadow:0 8px 25px rgba(14,151,112,.07)}
+.storage-mode.selected{border-color:#16af8a;box-shadow:inset 0 0 0 1px #16af8a,0 8px 30px rgba(14,160,119,.09)}
+.storage-mode-icon{display:grid;place-items:center;width:39px;height:39px;border-radius:12px;background:#e2f6ee;color:#0c9f80}
+.storage-mode strong{font-size:12px}.storage-mode p{font-size:10px;color:var(--muted);line-height:1.65;margin:6px 0 0}
+.storage-choice{position:absolute;right:15px;top:18px;color:#18a987}
+.storage-choice>span{display:block;width:15px;height:15px;border:1px solid #cad8db;border-radius:50%}
+.account-identity{display:flex;gap:12px;align-items:center;background:var(--input);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:17px}
+.identity-icon{display:grid;place-items:center;background:#dff6ed;color:#189c7d;border-radius:10px;width:39px;height:39px;font-weight:900;font-size:18px}
+.account-identity strong{font-size:12px;display:block}.account-identity small{font-size:10px;color:var(--muted);display:block;word-break:break-word}
+.storage-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.sync-status{display:flex;align-items:flex-start;gap:12px;margin:15px 0 20px}.sync-status strong{font-size:12px}.sync-status small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+.sync-dot{width:10px;height:10px;background:#9badb1;border-radius:50%;margin-top:5px;flex-shrink:0}
+.sync-dot.synced,.sync-dot.local{background:#15b393;box-shadow:0 0 0 4px #18bd9c19}
+.sync-dot.loading,.sync-dot.syncing{background:#e4a85c;box-shadow:0 0 0 4px #e4a85c24}
+.sync-dot.offline,.sync-dot.conflict{background:#e87d7d;box-shadow:0 0 0 4px #e87d7d22}
+.notice-warning{display:flex;align-items:flex-start;gap:9px;border:1px solid #f0d2a0;background:#fff8eb;color:#9f7031;padding:12px;border-radius:10px;font-size:11px;margin:13px 0;line-height:1.6}
+.notice-warning svg{flex-shrink:0}
+.cloud-lock,.auth-callback{position:fixed;inset:0;z-index:100;background:rgba(13,32,38,.76);backdrop-filter:blur(8px);display:grid;place-items:center;padding:22px}
+.cloud-lock-card{width:100%;max-width:430px;background:var(--paper);border:1px solid var(--border);box-shadow:0 30px 100px rgba(0,0,0,.2);border-radius:22px;padding:34px;display:grid;gap:14px;color:var(--ink)}
+.cloud-lock-card h2,.cloud-lock-card h1{font-size:24px;line-height:1.25;margin:0}
+.cloud-lock-card p{font-size:12px;color:var(--muted);margin:0}
+.cloud-lock-card .btn{width:100%}
+.lock-mark{display:grid;place-items:center;width:46px;height:46px;background:linear-gradient(140deg,#4ad5af,#0ba483);color:#fff;font-weight:900;border-radius:14px;font-size:26px;margin-bottom:9px}
+.auth-callback{position:fixed}.auth-callback a{color:var(--green);font-weight:800;text-decoration:none}
+@media(max-width:1100px){.storage-modes{grid-template-columns:1fr}.storage-mode{min-height:0;flex-direction:row;align-items:center}.storage-mode>div:nth-child(2){flex:1}}
+@media(max-width:540px){.storage-mode{align-items:flex-start}.storage-mode-icon{flex-shrink:0}.cloud-lock-card{padding:23px}}
+html[data-theme=dark] .storage-mode-icon,html[data-theme=dark] .identity-icon{background:#205548;color:#87eec8}
+html[data-theme=dark] .notice-warning{background:#4b3a24;border-color:#8b6734;color:#f2d3a8}
