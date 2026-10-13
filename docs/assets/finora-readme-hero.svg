@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="382" viewBox="0 0 1200 382" role="img" aria-labelledby="title desc">
+<title id="title">Finora — Your financial command center</title>
+<desc id="desc">Finora branding in emerald and midnight colors, with stylized dashboard cards and an abstract cash-flow chart. Decorative illustration, not actual account data.</desc>
+<defs>
+ <linearGradient id="background" x1="80" y1="20" x2="1140" y2="400" gradientUnits="userSpaceOnUse"><stop stop-color="#091f26"/><stop offset=".58" stop-color="#0d3e38"/><stop offset="1" stop-color="#0b282c"/></linearGradient>
+ <linearGradient id="jade" x1="695" y1="95" x2="1040" y2="342" gradientUnits="userSpaceOnUse"><stop stop-color="#9cf4c7"/><stop offset="1" stop-color="#1aa883"/></linearGradient>
+ <linearGradient id="glass" x1="652" y1="77" x2="1170" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#ffffff" stop-opacity=".17"/><stop offset="1" stop-color="#ffffff" stop-opacity=".045"/></linearGradient>
+ <linearGradient id="area" x1="830" y1="182" x2="820" y2="320" gradientUnits="userSpaceOnUse"><stop stop-color="#48d3a0" stop-opacity=".34"/><stop offset="1" stop-color="#48d3a0" stop-opacity="0"/></linearGradient>
+ <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#acffdb" opacity=".08"/></pattern>
+ <filter id="shadow" x="-40%" y="-40%" width="200%" height="200%"><feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#031412" flood-opacity=".5"/></filter>
+</defs>
+<rect width="1200" height="382" rx="24" fill="url(#background)"/>
+<rect width="1200" height="382" rx="24" fill="url(#dots)"/>
+<circle cx="1068" cy="83" r="180" fill="#31aa7a" opacity=".075"/>
+<circle cx="640" cy="396" r="220" fill="#5cf3b5" opacity=".045"/>
+<g transform="translate(74 70)">
+ <rect x="0" y="0" width="62" height="62" rx="19" fill="#143c38" stroke="#83e6bd" stroke-opacity=".56"/>
+ <path d="M19 43V19H43M19 31H36" stroke="#9af4c8" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+ <circle cx="44" cy="43" r="5" fill="#e0c887"/>
+</g>
+<text x="154" y="117" font-family="Arial,Helvetica,sans-serif" font-size="44" fill="#f7fff9" font-weight="700" letter-spacing="-1.6">finora<tspan fill="#9eecc7">.</tspan></text>
+<text x="75" y="177" font-family="Arial,Helvetica,sans-serif" font-size="11" fill="#91e9c4" font-weight="700" letter-spacing="3">PERSONAL • FREELANCE • BUSINESS</text>
+<text x="74" y="232" font-family="Arial,Helvetica,sans-serif" font-size="35" fill="#ffffff" font-weight="700" letter-spacing="-.7">Your money, beautifully</text>
+<text x="74" y="277" font-family="Arial,Helvetica,sans-serif" font-size="35" fill="#ffffff" font-weight="700" letter-spacing="-.7">organized.</text>
+<text x="76" y="319" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#b3d6ce">Track • Understand • Plan • Grow</text>
+<g filter="url(#shadow)">
+<rect x="662" y="72" width="469" height="255" rx="21" fill="url(#glass)" stroke="#9de2c4" stroke-opacity=".18"/>
+<rect x="685" y="95" width="422" height="54" rx="12" fill="#fff" fill-opacity=".075" stroke="#d8fff0" stroke-opacity=".08"/>
+<text x="702" y="115" font-family="Arial,Helvetica,sans-serif" font-size="10" fill="#a7cbbf" font-weight="700" letter-spacing="1.7">FINANCIAL OVERVIEW</text>
+<rect x="702" y="127" width="161" height="7" rx="3.5" fill="#a8f9d2" fill-opacity=".8"/>
+<rect x="1035" y="109" width="51" height="23" rx="11.5" fill="#2db888" fill-opacity=".23"/>
+<circle cx="1051" cy="120" r="4" fill="#62e5ab"/>
+<path d="M772 273L819 244L857 260L905 208L941 230L983 182L1026 203L1084 158" fill="none" stroke="#82edb2" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+<path d="M772 273L819 244L857 260L905 208L941 230L983 182L1026 203L1084 158V292H772Z" fill="url(#area)"/>
+<path d="M771 292H1092" stroke="#b9e6d3" stroke-opacity=".2"/>
+<path d="M770 238H1092M770 187H1092" stroke="#b9e6d3" stroke-opacity=".11" stroke-dasharray="4 7"/>
+<circle cx="983" cy="182" r="6" fill="#ebdb9d" stroke="#234c40" stroke-width="3"/>
+<rect x="694" y="174" width="58" height="121" rx="11" fill="#142f34" stroke="#9ed8c1" stroke-opacity=".1"/>
+<rect x="710" y="251" width="8" height="27" rx="4" fill="#44b999"/>
+<rect x="722" y="225" width="8" height="53" rx="4" fill="#65d3ad"/>
+<rect x="734" y="198" width="8" height="80" rx="4" fill="#a6f2cb"/>
+</g>
+<text x="1177" y="364" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="9" fill="#9bc8b7">Illustrative interface artwork</text>
+</svg>
